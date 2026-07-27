@@ -99,6 +99,8 @@ body {
   /* Efek blur pada background di belakang kartu (PENTING untuk efek kaca sungguhan) */
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
   
   /* Efek kaca 3D: Shadow luar (blur effect) + Pantulan cahaya dalam */
   box-shadow: 
@@ -124,6 +126,8 @@ body {
   );
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
   border-bottom: 1.5px solid rgba(255, 255, 255, 0.9);
   box-shadow: 
     0 10px 30px -5px rgba(0, 0, 0, 0.1),
@@ -139,6 +143,8 @@ body {
   );
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.6);
   border-left: 1px solid rgba(255, 255, 255, 0.6);
@@ -208,6 +214,8 @@ input, select {
   );
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-top: 1.5px solid rgba(255, 255, 255, 0.9);
   border-left: 1.5px solid rgba(255, 255, 255, 0.9);
@@ -296,6 +304,8 @@ button:active {
   );
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-top: 1.5px solid rgba(255, 255, 255, 0.9);
   border-left: 1.5px solid rgba(255, 255, 255, 0.9);
