@@ -1,0 +1,177 @@
+import { useState, useEffect } from 'react';
+import { ref, onValue, set, query, orderByChild, equalTo } from 'firebase/database';
+import { database } from '../../firebase';
+import { useAuth } from '../../contexts/AuthContext';
+import Swal from 'sweetalert2';
+import { PlusCircle, Server, Settings as SettingsIcon, SlidersHorizontal } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+function UserDeviceManager() {
+  const { currentUser } = useAuth();
+  const [devices, setDevices] = useState({});
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newMac, setNewMac] = useState('');
+  const [newName, setNewName] = useState('');
+  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Math.floor(Date.now() / 1000)), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    // Menggunakan query spesifik agar Firebase Rules mengizinkan (query.equalTo == auth.uid)
+    const devicesRef = query(ref(database, 'devices'), orderByChild('owner_uid'), equalTo(currentUser.uid));
+    const unsubDevices = onValue(devicesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setDevices(snapshot.val());
+      } else {
+        setDevices({});
+      }
+    });
+
+    return () => unsubDevices();
+  }, [currentUser]);
+
+  const handleAddDevice = async (e) => {
+    e.preventDefault();
+    if (!newMac || !newName) return;
+
+    const swalConfig = {
+      customClass: {
+        popup: 'glass-swal',
+        title: 'glass-swal-title',
+        htmlContainer: 'glass-swal-content',
+        confirmButton: 'glass-swal-confirm'
+      }
+    };
+
+    try {
+      await set(ref(database, `devices/${newMac}`), {
+        owner_uid: currentUser.uid,
+        name: newName,
+        settings: {
+          target_tds_min: 800,
+          target_tds_max: 1200,
+          target_ph_min: 5.5,
+          target_ph_max: 6.5
+        },
+        controls: {
+          mode: 'auto',
+          pump_main: false,
+          pump_nutrisi_a: false,
+          pump_nutrisi_b: false,
+          pump_ph_up: false,
+          pump_ph_down: false
+        }
+      });
+      setShowAddForm(false);
+      setNewMac('');
+      setNewName('');
+      Swal.fire({
+        ...swalConfig,
+        title: 'Berhasil!',
+        text: 'Alat baru berhasil ditambahkan.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (err) {
+      Swal.fire({
+        ...swalConfig,
+        title: 'Gagal',
+        text: "Gagal menambahkan alat: " + err.message,
+        icon: 'error'
+      });
+    }
+  };
+
+  return (
+    <div className="device-manager">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h2 className="title-gradient" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <SlidersHorizontal size={24} /> Kelola Alat
+        </h2>
+        <button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600 }}
+        >
+          <PlusCircle size={18} /> Tambah
+        </button>
+      </div>
+
+      {showAddForm && (
+        <div className="glass-card" style={{ marginBottom: '2rem', border: '1px solid var(--primary)' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--text-main)' }}>Tambah Alat Baru</h3>
+          <form onSubmit={handleAddDevice} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Kode Perangkat (Serial Number)</label>
+              <input 
+                type="text" required value={newMac} onChange={(e) => setNewMac(e.target.value)}
+                placeholder="misal: HYDRO-A1B2"
+              />
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>*Lihat kode unik pada stiker di kotak panel alat Anda.</div>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Nama Alat (Lokasi/Blok)</label>
+              <input 
+                type="text" required value={newName} onChange={(e) => setNewName(e.target.value)}
+                placeholder="misal: Hidroponik Blok A"
+              />
+            </div>
+            <button type="submit" style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, marginTop: '0.5rem' }}>
+              Simpan Alat Baru
+            </button>
+          </form>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {Object.keys(devices).length === 0 ? (
+          <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+            <Server size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
+            <p>Belum ada alat yang ditambahkan.</p>
+          </div>
+        ) : (
+          Object.entries(devices).map(([deviceId, devData]) => {
+            const lastUpdated = devData.last_updated || 0;
+            const isOnline = (currentTime - lastUpdated) <= 60 && lastUpdated > 0;
+            
+            return (
+              <div 
+                key={deviceId} 
+                className="glass-card device-card-hover" 
+                onClick={() => navigate(`/device/${deviceId}/config`)}
+                style={{ cursor: 'pointer', padding: '1.2rem' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ background: 'var(--surface-hover)', padding: '0.8rem', borderRadius: '50%' }}>
+                      <Server size={24} color="var(--primary)" />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{devData.name || 'Alat Tanpa Nama'}</h3>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Device ID: {deviceId}</p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    {isOnline ? (
+                      <span style={{ fontSize: '0.8rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
+                    )}
+                    <SettingsIcon size={20} color="var(--text-muted)" />
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default UserDeviceManager;

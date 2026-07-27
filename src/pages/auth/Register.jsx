@@ -1,0 +1,158 @@
+import { useState } from 'react';
+import { auth, database } from '../../firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import Swal from 'sweetalert2';
+import { ref, set } from 'firebase/database';
+import { Link, useNavigate } from 'react-router-dom';
+import { UserPlus } from 'lucide-react';
+
+function Register() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [institution, setInstitution] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const swalConfig = {
+      customClass: {
+        popup: 'glass-swal',
+        title: 'glass-swal-title',
+        htmlContainer: 'glass-swal-content',
+        confirmButton: 'glass-swal-confirm'
+      }
+    };
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Send verification email
+      await sendEmailVerification(user);
+
+      // Save user to database with default 'user' role and 'pending' status
+      await set(ref(database, `users/${user.uid}`), {
+        email: user.email,
+        name: name,
+        phone: phone,
+        institution: institution,
+        role: 'user',
+        status: 'pending' // Admin needs to approve
+      });
+      
+      Swal.fire({
+        ...swalConfig,
+        title: 'Pendaftaran Berhasil!',
+        text: 'Silakan cek email Anda untuk verifikasi. Akun Anda sedang menunggu persetujuan admin.',
+        icon: 'success'
+      }).then(() => {
+        navigate('/');
+      });
+    } catch (err) {
+      Swal.fire({
+        ...swalConfig,
+        title: 'Gagal Mendaftar',
+        text: err.message,
+        icon: 'error'
+      });
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '1.5rem', boxSizing: 'border-box', width: '100%' }}>
+      <div className="glass-card" style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          {/* Premium Glowing Icon Container */}
+          <div style={{ 
+            background: 'rgba(16, 185, 129, 0.1)', 
+            width: '80px', 
+            height: '80px', 
+            borderRadius: '50%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            margin: '0 auto 1.5rem auto',
+            boxShadow: '0 0 20px rgba(16, 185, 129, 0.2), inset 0 2px 5px rgba(255,255,255,0.8)',
+            border: '1px solid rgba(16, 185, 129, 0.3)'
+          }}>
+            <UserPlus size={40} color="var(--primary)" />
+          </div>
+          <h2 className="title-gradient">Buat Akun</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bergabung untuk memonitor hidroponik</p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Nama Lengkap</label>
+            <input 
+              type="text" 
+              required 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Email</label>
+            <input 
+              type="email" 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>No. WhatsApp</label>
+            <input 
+              type="tel" 
+              required 
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Contoh: 08123456789"
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Instansi / Lokasi Kebun</label>
+            <input 
+              type="text" 
+              required 
+              value={institution}
+              onChange={(e) => setInstitution(e.target.value)}
+              placeholder="Contoh: Green Farm blok B"
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Password</label>
+            <input 
+              type="password" 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer', marginTop: '1rem' }}
+          >
+            {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
+          </button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem' }}>
+          <span style={{ color: 'var(--text-muted)' }}>Sudah punya akun? </span>
+          <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Login di sini</Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Register;

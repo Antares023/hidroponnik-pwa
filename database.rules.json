@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'master_admin'",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'master_admin'",
+      "$uid": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'master_admin' || $uid === auth.uid)",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'master_admin' || $uid === auth.uid)"
+      }
+    },
+    "devices": {
+      ".indexOn": ["owner_uid"],
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'master_admin' || (query.orderByChild == 'owner_uid' && query.equalTo == auth.uid))",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'master_admin'",
+      "$deviceId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'master_admin' || (data.child('owner_uid').val() === auth.uid && root.child('users').child(auth.uid).child('status').val() === 'approved'))",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'master_admin' || ((!data.exists() || data.child('owner_uid').val() === auth.uid) && root.child('users').child(auth.uid).child('status').val() === 'approved'))"
+      }
+    },
+    "tickets": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'master_admin' || root.child('users').child(auth.uid).child('status').val() == 'approved')"
+    }
+  }
+}

@@ -1,0 +1,157 @@
+import { useState } from 'react';
+import { auth } from '../../firebase';
+import Swal from 'sweetalert2';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { Link, useNavigate } from 'react-router-dom';
+import { Sprout, KeyRound } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+
+function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const { resetPassword } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    const swalConfig = {
+      customClass: {
+        popup: 'glass-swal',
+        title: 'glass-swal-title',
+        htmlContainer: 'glass-swal-content',
+        confirmButton: 'glass-swal-confirm'
+      }
+    };
+
+    if (isResetting) {
+      try {
+        await resetPassword(email);
+        Swal.fire({
+          ...swalConfig,
+          title: 'Berhasil',
+          text: 'Tautan pemulihan password telah dikirim ke email Anda. Silakan periksa inbox atau spam.',
+          icon: 'success'
+        });
+      } catch (err) {
+        Swal.fire({
+          ...swalConfig,
+          title: 'Gagal',
+          text: 'Pastikan email sudah terdaftar.',
+          icon: 'error'
+        });
+      }
+    } else {
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        Swal.fire({
+          ...swalConfig,
+          title: 'Login Berhasil',
+          text: 'Selamat datang kembali!',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
+          navigate('/');
+        });
+      } catch (err) {
+        Swal.fire({
+          ...swalConfig,
+          title: 'Gagal Login',
+          text: 'Periksa email dan password Anda.',
+          icon: 'error'
+        });
+      }
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '1.5rem', boxSizing: 'border-box', width: '100%' }}>
+      <div className="glass-card" style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+
+          {/* Premium Glowing Icon Container */}
+          <div style={{
+            background: 'rgba(16, 185, 129, 0.1)',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem auto',
+            boxShadow: '0 0 20px rgba(16, 185, 129, 0.2), inset 0 2px 5px rgba(255,255,255,0.8)',
+            border: '1px solid rgba(16, 185, 129, 0.3)'
+          }}>
+            {isResetting ? (
+              <KeyRound size={36} color="var(--primary)" />
+            ) : (
+              <Sprout size={40} color="var(--primary)" />
+            )}
+          </div>
+          <h2 className="title-gradient">{isResetting ? 'Reset Password' : 'SMART HYDRO'}</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            {isResetting ? 'Masukkan email Anda untuk menerima tautan pemulihan.' : 'Masuk untuk memantau sistem hidroponik Anda'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          {!isResetting && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer', marginTop: '1rem' }}
+          >
+            {loading ? 'Memproses...' : (isResetting ? 'Kirim Tautan Reset' : 'Masuk')}
+          </button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div>
+            <button
+              onClick={() => { setIsResetting(!isResetting); setError(''); setMessage(''); }}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}
+            >
+              {isResetting ? 'Kembali ke Halaman Login' : 'Lupa Password?'}
+            </button>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)' }}>Belum punya akun? </span>
+            <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Daftar di sini</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Login;
