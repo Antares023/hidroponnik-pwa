@@ -49,8 +49,8 @@ function UserDeviceManager() {
     };
 
     try {
-      // 1. Cek apakah ID sudah terpakai
-      const snapshot = await get(child(ref(database), `devices/${newMac}`));
+      // 1. Cek apakah ID sudah terpakai dengan hanya membaca owner_uid-nya (agar tidak kena Permission Denied)
+      const snapshot = await get(child(ref(database), `devices/${newMac}/owner_uid`));
       if (snapshot.exists()) {
         Swal.fire({
           ...swalConfig,
