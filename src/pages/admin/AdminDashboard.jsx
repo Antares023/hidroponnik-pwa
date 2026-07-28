@@ -308,8 +308,8 @@ function AdminDashboard({ view = 'dashboard' }) {
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                      <button onClick={() => handleApprove(uid, user.name)} style={{ flex: 1, background: 'var(--primary)', color: 'white', border: 'none', padding: '0.7rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Setujui</button>
-                      <button onClick={() => handleReject(uid, user.name)} style={{ flex: 1, background: 'rgba(239, 68, 68, 0.2)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.7rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Tolak</button>
+                      <button onClick={() => handleApprove(uid, user.name)} className="btn-3d" style={{ flex: 1 }}>Setujui</button>
+                      <button onClick={() => handleReject(uid, user.name)} className="btn-3d btn-danger" style={{ flex: 1 }}>Tolak</button>
                     </div>
                   </div>
                 ))
@@ -384,12 +384,12 @@ function AdminDashboard({ view = 'dashboard' }) {
                           
                           {/* ADMIN CONTROLS FOR USER */}
                           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '1rem' }}>
-                            <button onClick={() => startEditUser(uid, user)} style={{ background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Edit Pengguna</button>
-                            <button onClick={() => handleDeleteUser(uid, user.name)} style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Hapus Pengguna</button>
+                            <button onClick={() => startEditUser(uid, user)} className="btn-3d-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Edit Pengguna</button>
+                            <button onClick={() => handleDeleteUser(uid, user.name)} className="btn-3d btn-danger" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Hapus Pengguna</button>
                           </div>
 
                           {editingUserId === uid && (
-                            <form onSubmit={(e) => handleUpdateUser(e, uid)} style={{ background: 'var(--surface)', padding: '1.2rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', border: '1px solid var(--primary)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                            <form onSubmit={(e) => handleUpdateUser(e, uid)} className="glass-panel" style={{ marginBottom: '1.5rem', border: '1px solid var(--primary)' }}>
                               <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '0.9rem' }}>Edit Data Pengguna</h4>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                                 <div>
@@ -405,8 +405,8 @@ function AdminDashboard({ view = 'dashboard' }) {
                                   <input type="text" value={editFormData.institution} onChange={e => setEditFormData({...editFormData, institution: e.target.value})} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }} />
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                  <button type="submit" style={{ flex: 1, background: 'var(--primary)', color: 'white', border: 'none', padding: '0.6rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>Simpan</button>
-                                  <button type="button" onClick={cancelEditUser} style={{ flex: 1, background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--surface-border)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>Batal</button>
+                                  <button type="submit" className="btn-3d" style={{ flex: 1, padding: '0.6rem' }}>Simpan</button>
+                                  <button type="button" onClick={cancelEditUser} className="btn-3d-secondary" style={{ flex: 1, padding: '0.6rem' }}>Batal</button>
                                 </div>
                               </div>
                             </form>
@@ -476,13 +476,15 @@ function AdminDashboard({ view = 'dashboard' }) {
                                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <button 
                                       onClick={(e) => { e.stopPropagation(); navigate(`/device/${deviceId}/config`); }}
-                                      style={{ flex: 1, background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textAlign: 'center' }}
+                                      className="btn-3d-secondary"
+                                      style={{ flex: 1, padding: '0.6rem', fontSize: '0.8rem', textAlign: 'center' }}
                                     >
                                       Konfigurasi
                                     </button>
                                     <button 
                                       onClick={(e) => { e.stopPropagation(); handleDeleteDeviceAdmin(deviceId, devData.name); }}
-                                      style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.6rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                      className="btn-3d btn-danger"
+                                      style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}
                                     >
                                       Hapus
                                     </button>

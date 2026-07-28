@@ -120,7 +120,7 @@ function UserDashboard() {
     if (alerts.length === 0) return null;
 
     return (
-      <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--status-critical)', borderRadius: 'var(--radius-sm)', padding: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-sm)', padding: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--status-critical)', fontWeight: 600, marginBottom: '0.5rem' }}>
           <AlertTriangle size={20} /> Peringatan Sistem
         </div>
@@ -240,16 +240,18 @@ function UserDashboard() {
                 <h3 className="title-gradient" style={{ fontSize: '1.2rem', margin: 0 }}>Sistem Kontrol</h3>
                 
                 {/* Auto/Manual Toggle Switch */}
-                <div style={{ display: 'flex', background: 'var(--surface-border)', borderRadius: '2rem', padding: '0.2rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', background: 'transparent', padding: '0.2rem' }}>
                   <button 
                     onClick={() => toggleMode('auto')}
-                    style={{ background: controls.mode === 'auto' ? 'var(--primary)' : 'transparent', color: controls.mode === 'auto' ? 'white' : 'var(--text-muted)', border: 'none', padding: '0.4rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s' }}
+                    className={controls.mode === 'auto' ? 'btn-3d' : 'btn-3d-secondary'}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', flex: 1 }}
                   >
                     Otomatis
                   </button>
                   <button 
                     onClick={() => toggleMode('manual')}
-                    style={{ background: controls.mode === 'manual' ? 'var(--status-warning)' : 'transparent', color: controls.mode === 'manual' ? 'white' : 'var(--text-muted)', border: 'none', padding: '0.4rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s' }}
+                    className={controls.mode === 'manual' ? 'btn-3d btn-danger' : 'btn-3d-secondary'}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', flex: 1 }}
                   >
                     Manual
                   </button>
@@ -276,7 +278,7 @@ function UserDashboard() {
                       </div>
                       <button 
                         onClick={() => togglePump('pump_main')}
-                        style={{ background: controls.pump_main ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: controls.pump_main ? '#10b981' : '#ef4444', border: `1px solid ${controls.pump_main ? '#10b981' : '#ef4444'}`, padding: '0.6rem 1rem', borderRadius: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, minWidth: '100px', justifyContent: 'center' }}
+                        className={controls.pump_main ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                       >
                         <Power size={16} /> {controls.pump_main ? 'ON' : 'OFF'}
                       </button>
@@ -289,7 +291,7 @@ function UserDashboard() {
                       </div>
                       <button 
                         onClick={() => togglePump('pump_nutrisi_a')}
-                        style={{ background: controls.pump_nutrisi_a ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: controls.pump_nutrisi_a ? '#10b981' : '#ef4444', border: `1px solid ${controls.pump_nutrisi_a ? '#10b981' : '#ef4444'}`, padding: '0.6rem 1rem', borderRadius: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, minWidth: '100px', justifyContent: 'center' }}
+                        className={controls.pump_nutrisi_a ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                       >
                         <Power size={16} /> {controls.pump_nutrisi_a ? 'ON' : 'OFF'}
                       </button>
@@ -302,7 +304,7 @@ function UserDashboard() {
                       </div>
                       <button 
                         onClick={() => togglePump('pump_nutrisi_b')}
-                        style={{ background: controls.pump_nutrisi_b ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: controls.pump_nutrisi_b ? '#10b981' : '#ef4444', border: `1px solid ${controls.pump_nutrisi_b ? '#10b981' : '#ef4444'}`, padding: '0.6rem 1rem', borderRadius: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, minWidth: '100px', justifyContent: 'center' }}
+                        className={controls.pump_nutrisi_b ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                       >
                         <Power size={16} /> {controls.pump_nutrisi_b ? 'ON' : 'OFF'}
                       </button>
@@ -316,7 +318,7 @@ function UserDashboard() {
                         </div>
                         <button 
                           onClick={() => togglePump('pump_ph_up')}
-                          style={{ width: '100%', background: controls.pump_ph_up ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: controls.pump_ph_up ? '#10b981' : '#ef4444', border: `1px solid ${controls.pump_ph_up ? '#10b981' : '#ef4444'}`, padding: '0.6rem 1rem', borderRadius: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, justifyContent: 'center' }}
+                          className={controls.pump_ph_up ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                         >
                           <Power size={16} /> {controls.pump_ph_up ? 'ON' : 'OFF'}
                         </button>
@@ -329,7 +331,7 @@ function UserDashboard() {
                         </div>
                         <button 
                           onClick={() => togglePump('pump_ph_down')}
-                          style={{ width: '100%', background: controls.pump_ph_down ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: controls.pump_ph_down ? '#10b981' : '#ef4444', border: `1px solid ${controls.pump_ph_down ? '#10b981' : '#ef4444'}`, padding: '0.6rem 1rem', borderRadius: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, justifyContent: 'center' }}
+                          className={controls.pump_ph_down ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                         >
                           <Power size={16} /> {controls.pump_ph_down ? 'ON' : 'OFF'}
                         </button>

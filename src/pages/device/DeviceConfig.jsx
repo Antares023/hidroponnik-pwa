@@ -165,7 +165,7 @@ function DeviceConfig() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+          <button type="submit" disabled={loading} className="btn-3d" style={{ padding: '1rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
             <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Konfigurasi'}
           </button>
         </form>

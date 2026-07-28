@@ -134,7 +134,8 @@ function UserTickets() {
         </h2>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
-          style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600 }}
+          className="btn-3d"
+          style={{ padding: '0.6rem 1.2rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
           <PlusCircle size={18} /> Buat Tiket
         </button>
@@ -162,8 +163,8 @@ function UserTickets() {
               />
             </div>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-              <button type="button" onClick={() => setShowAddForm(false)} style={{ flex: 1, background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--surface-border)', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>Batal</button>
-              <button type="submit" disabled={loading} style={{ flex: 2, background: 'var(--primary)', color: 'white', border: 'none', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>
+              <button type="button" onClick={() => setShowAddForm(false)} className="btn-3d-secondary" style={{ flex: 1 }}>Batal</button>
+              <button type="submit" disabled={loading} className="btn-3d" style={{ flex: 2 }}>
                 {loading ? 'Mengirim...' : 'Kirim Pengaduan'}
               </button>
             </div>
@@ -201,7 +202,8 @@ function UserTickets() {
                     {ticket.status === 'open' && (
                       <button 
                         onClick={() => handleDeleteTicket(ticket.id)}
-                        style={{ background: 'transparent', color: 'var(--status-critical)', border: 'none', padding: '0.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}
+                        className="btn-3d btn-danger"
+                        style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
                         title="Tarik Pengaduan"
                       >
                         <Trash2 size={14} /> Tarik Tiket

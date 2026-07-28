@@ -3,7 +3,7 @@ import { ref, onValue, set, query, orderByChild, equalTo, get, child, remove } f
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
-import { PlusCircle, Server, Settings as SettingsIcon, SlidersHorizontal } from 'lucide-react';
+import { PlusCircle, Server, Settings as SettingsIcon, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function UserDeviceManager() {
@@ -130,7 +130,8 @@ function UserDeviceManager() {
         </h2>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
-          style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600 }}
+          className="btn-3d"
+          style={{ padding: '0.6rem 1.2rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
           <PlusCircle size={18} /> Tambah
         </button>
@@ -155,7 +156,7 @@ function UserDeviceManager() {
                 placeholder="misal: Hidroponik Blok A"
               />
             </div>
-            <button type="submit" style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, marginTop: '0.5rem' }}>
+            <button type="submit" className="btn-3d" style={{ marginTop: '0.5rem' }}>
               Simpan Alat Baru
             </button>
           </form>
@@ -180,31 +181,38 @@ function UserDeviceManager() {
                 onClick={() => navigate(`/device/${deviceId}/config`)}
                 style={{ cursor: 'pointer', padding: '1.2rem' }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ background: 'var(--surface-hover)', padding: '0.8rem', borderRadius: '50%' }}>
                       <Server size={24} color="var(--primary)" />
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{devData.name || 'Alat Tanpa Nama'}</h3>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Device ID: {deviceId}</p>
+                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)', lineHeight: 1.2 }}>{devData.name || 'Alat Tanpa Nama'}</h3>
+                      <p style={{ margin: 0, marginTop: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>ID: {deviceId}</p>
                     </div>
                   </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {isOnline ? (
-                        <span style={{ fontSize: '0.8rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
-                      ) : (
-                        <span style={{ fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
-                      )}
-                      
-                      <button 
-                        onClick={(e) => handleDeleteDevice(e, deviceId, devData.name)}
-                        style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.3rem 0.5rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600, marginLeft: '0.5rem' }}
-                      >
-                        Hapus
-                      </button>
-                      <SettingsIcon size={20} color="var(--text-muted)" style={{ marginLeft: '0.5rem' }} />
-                    </div>
+                  <div style={{ flexShrink: 0 }}>
+                    {isOnline ? (
+                      <span style={{ fontSize: '0.75rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', marginTop: '1.2rem', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '1rem' }}>
+                  <button 
+                    onClick={(e) => handleDeleteDevice(e, deviceId, devData.name)}
+                    className="btn-3d btn-danger"
+                    style={{ padding: '0.6rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Hapus Perangkat"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  
+                  <div style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <SettingsIcon size={16} color="var(--text-main)" />
+                  </div>
                 </div>
               </div>
             );

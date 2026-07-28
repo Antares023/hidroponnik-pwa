@@ -184,7 +184,8 @@ function AdminTickets() {
                           {ticket.status === 'open' && (
                             <button 
                               onClick={() => handleResolveTicket(ticket.id)}
-                              style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                              className="btn-3d"
+                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                             >
                               <CheckCircle2 size={14} /> Tandai Selesai
                             </button>

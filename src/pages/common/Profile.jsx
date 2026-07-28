@@ -139,7 +139,8 @@ function Profile() {
         {!showPasswordForm ? (
           <button 
             onClick={() => setShowPasswordForm(true)}
-            style={{ background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', width: '100%', fontWeight: 600, transition: 'var(--transition)' }}
+            className="btn-3d-secondary"
+            style={{ width: '100%' }}
           >
             Ubah Password
           </button>
@@ -171,14 +172,16 @@ function Profile() {
               <button 
                 type="button" 
                 onClick={() => setShowPasswordForm(false)}
-                style={{ flex: 1, background: 'var(--surface-hover)', color: 'var(--text-main)', border: '1px solid var(--surface-border)', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
+                className="btn-3d-secondary"
+                style={{ flex: 1 }}
               >
                 Batal
               </button>
               <button 
                 type="submit" 
                 disabled={loading}
-                style={{ flex: 2, background: 'var(--primary)', color: 'white', border: 'none', padding: '0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                className="btn-3d"
+                style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
               >
                 <Save size={18}/> {loading ? 'Menyimpan...' : 'Simpan'}
               </button>
@@ -191,9 +194,11 @@ function Profile() {
       <div style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '1rem' }}>
         <button 
           onClick={handleLogout}
-          style={{ background: 'transparent', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.8rem 2rem', borderRadius: 'var(--radius-lg)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          className="btn-3d btn-danger"
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderRadius: '2rem' }}
         >
-          <LogOut size={18} /> Keluar (Logout)
+          <LogOut size={18} />
+          Keluar
         </button>
       </div>
 

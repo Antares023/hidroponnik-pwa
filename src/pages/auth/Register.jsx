@@ -72,7 +72,7 @@ function Register() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           {/* Premium Glowing Icon Container */}
           <div style={{ 
-            background: 'rgba(16, 185, 129, 0.1)', 
+            background: 'rgba(22, 66, 60, 0.1)', 
             width: '80px', 
             height: '80px', 
             borderRadius: '50%', 
@@ -80,8 +80,8 @@ function Register() {
             alignItems: 'center', 
             justifyContent: 'center', 
             margin: '0 auto 1.5rem auto',
-            boxShadow: '0 0 20px rgba(16, 185, 129, 0.2), inset 0 2px 5px rgba(255,255,255,0.8)',
-            border: '1px solid rgba(16, 185, 129, 0.3)'
+            boxShadow: 'inset 1px 1px 2px rgba(255,255,255,0.8), inset -1px -1px 2px rgba(0,0,0,0.05)',
+            border: '1px solid rgba(22, 66, 60, 0.3)'
           }}>
             <UserPlus size={40} color="var(--primary)" />
           </div>
@@ -140,7 +140,8 @@ function Register() {
           <button 
             type="submit" 
             disabled={loading}
-            style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer', marginTop: '1rem' }}
+            className="btn-3d"
+            style={{ marginTop: '1rem', padding: '1rem' }}
           >
             {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
           </button>
