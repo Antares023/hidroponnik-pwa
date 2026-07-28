@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, set, query, orderByChild, equalTo } from 'firebase/database';
+import { ref, onValue, set, query, orderByChild, equalTo, get, child, remove } from 'firebase/database';
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
@@ -49,6 +49,19 @@ function UserDeviceManager() {
     };
 
     try {
+      // 1. Cek apakah ID sudah terpakai
+      const snapshot = await get(child(ref(database), `devices/${newMac}`));
+      if (snapshot.exists()) {
+        Swal.fire({
+          ...swalConfig,
+          title: 'Gagal',
+          text: 'Kode perangkat ini sudah terdaftar di sistem. Harap gunakan kode unik lain.',
+          icon: 'error'
+        });
+        return;
+      }
+
+      // 2. Jika belum, tambahkan
       await set(ref(database, `devices/${newMac}`), {
         owner_uid: currentUser.uid,
         name: newName,
@@ -70,21 +83,42 @@ function UserDeviceManager() {
       setShowAddForm(false);
       setNewMac('');
       setNewName('');
-      Swal.fire({
-        ...swalConfig,
-        title: 'Berhasil!',
-        text: 'Alat baru berhasil ditambahkan.',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
-      });
-    } catch (err) {
-      Swal.fire({
-        ...swalConfig,
-        title: 'Gagal',
-        text: "Gagal menambahkan alat: " + err.message,
-        icon: 'error'
-      });
+      Swal.fire({ ...swalConfig, title: 'Berhasil', text: 'Perangkat berhasil ditambahkan!', icon: 'success', timer: 1500, showConfirmButton: false });
+    } catch (error) {
+      Swal.fire({ ...swalConfig, title: 'Gagal', text: error.message, icon: 'error' });
+    }
+  };
+
+  const handleDeleteDevice = async (e, deviceId, deviceName) => {
+    e.stopPropagation(); // Mencegah navigasi ke config saat klik hapus
+    const swalConfig = {
+      customClass: {
+        popup: 'glass-swal',
+        title: 'glass-swal-title',
+        htmlContainer: 'glass-swal-content',
+        confirmButton: 'glass-swal-confirm',
+        cancelButton: 'glass-swal-cancel'
+      }
+    };
+
+    const confirm = await Swal.fire({
+      ...swalConfig,
+      title: 'Hapus Perangkat?',
+      text: `Apakah Anda yakin ingin menghapus perangkat "${deviceName}"? Data dan histori alat ini tidak dapat dikembalikan.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      reverseButtons: true
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await remove(ref(database, `devices/${deviceId}`));
+        Swal.fire({ ...swalConfig, title: 'Terhapus!', text: 'Perangkat berhasil dihapus.', icon: 'success', timer: 1500, showConfirmButton: false });
+      } catch (error) {
+        Swal.fire({ ...swalConfig, title: 'Gagal', text: error.message, icon: 'error' });
+      }
     }
   };
 
@@ -156,14 +190,21 @@ function UserDeviceManager() {
                       <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Device ID: {deviceId}</p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    {isOnline ? (
-                      <span style={{ fontSize: '0.8rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
-                    ) : (
-                      <span style={{ fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
-                    )}
-                    <SettingsIcon size={20} color="var(--text-muted)" />
-                  </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {isOnline ? (
+                        <span style={{ fontSize: '0.8rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
+                      ) : (
+                        <span style={{ fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
+                      )}
+                      
+                      <button 
+                        onClick={(e) => handleDeleteDevice(e, deviceId, devData.name)}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.3rem 0.5rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600, marginLeft: '0.5rem' }}
+                      >
+                        Hapus
+                      </button>
+                      <SettingsIcon size={20} color="var(--text-muted)" style={{ marginLeft: '0.5rem' }} />
+                    </div>
                 </div>
               </div>
             );

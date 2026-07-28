@@ -115,11 +115,17 @@ function AdminDashboard({ view = 'dashboard' }) {
     if (!confirm.isConfirmed) return;
 
     try {
+      // Hapus perangkat milik user ini (Cascade Delete)
+      const userDevices = getDevicesByUser(uid);
+      for (const [deviceId] of userDevices) {
+        await remove(ref(database, `devices/${deviceId}`));
+      }
+      // Hapus user
       await remove(ref(database, `users/${uid}`));
       Swal.fire({
         ...swalConfig,
         title: 'Terhapus!',
-        text: 'Akun pendaftar telah ditolak dan dihapus.',
+        text: 'Akun pendaftar beserta perangkatnya telah ditolak dan dihapus.',
         icon: 'success',
         timer: 1500,
         showConfirmButton: false
@@ -168,7 +174,7 @@ function AdminDashboard({ view = 'dashboard' }) {
     const confirm = await Swal.fire({
       ...swalConfig,
       title: 'Hapus Permanen?',
-      text: `Apakah Anda yakin ingin menghapus akun ${userName} beserta semua hak aksesnya? Aksi ini tidak dapat dibatalkan.`,
+      text: `Apakah Anda yakin ingin menghapus akun ${userName} beserta semua perangkat miliknya? Aksi ini tidak dapat dibatalkan.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Ya, Hapus',
@@ -177,8 +183,35 @@ function AdminDashboard({ view = 'dashboard' }) {
     });
     if (confirm.isConfirmed) {
       try {
+        // Hapus perangkat milik user ini (Cascade Delete)
+        const userDevices = getDevicesByUser(uid);
+        for (const [deviceId] of userDevices) {
+          await remove(ref(database, `devices/${deviceId}`));
+        }
+        // Hapus user
         await remove(ref(database, `users/${uid}`));
-        Swal.fire({ ...swalConfig, title: 'Terhapus!', text: 'Akun berhasil dihapus.', icon: 'success', timer: 1500, showConfirmButton: false });
+        Swal.fire({ ...swalConfig, title: 'Terhapus!', text: 'Akun beserta perangkatnya berhasil dihapus.', icon: 'success', timer: 1500, showConfirmButton: false });
+      } catch (error) {
+        Swal.fire({ ...swalConfig, title: 'Gagal', text: error.message, icon: 'error' });
+      }
+    }
+  };
+
+  const handleDeleteDeviceAdmin = async (deviceId, deviceName) => {
+    const confirm = await Swal.fire({
+      ...swalConfig,
+      title: 'Hapus Paksa Perangkat?',
+      text: `Yakin ingin mencabut perangkat "${deviceName}" secara paksa? Data tidak dapat dikembalikan.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      reverseButtons: true
+    });
+    if (confirm.isConfirmed) {
+      try {
+        await remove(ref(database, `devices/${deviceId}`));
+        Swal.fire({ ...swalConfig, title: 'Terhapus!', text: 'Perangkat berhasil dihapus dari sistem.', icon: 'success', timer: 1500, showConfirmButton: false });
       } catch (error) {
         Swal.fire({ ...swalConfig, title: 'Gagal', text: error.message, icon: 'error' });
       }
@@ -231,16 +264,16 @@ function AdminDashboard({ view = 'dashboard' }) {
       {view === 'users' && (
         <>
           {/* Tab Navigation dalam Kelola User */}
-          <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--surface-border)', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--surface-border)', marginBottom: '1.5rem', overflowX: 'auto' }}>
             <button 
               onClick={() => setActiveTab('overview')}
-              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'overview' ? 700 : 500, borderBottom: activeTab === 'overview' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'overview' ? 700 : 500, borderBottom: activeTab === 'overview' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               Active Users
             </button>
             <button 
               onClick={() => setActiveTab('pending')}
-              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'pending' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'pending' ? 700 : 500, borderBottom: activeTab === 'pending' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', position: 'relative' }}
+              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'pending' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'pending' ? 700 : 500, borderBottom: activeTab === 'pending' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', position: 'relative', whiteSpace: 'nowrap' }}
             >
               Pending
               {totalPending > 0 && (
@@ -248,6 +281,12 @@ function AdminDashboard({ view = 'dashboard' }) {
                   {totalPending}
                 </span>
               )}
+            </button>
+            <button 
+              onClick={() => setActiveTab('devices')}
+              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'devices' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'devices' ? 700 : 500, borderBottom: activeTab === 'devices' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              Semua Perangkat
             </button>
           </div>
 
@@ -274,6 +313,48 @@ function AdminDashboard({ view = 'dashboard' }) {
                     </div>
                   </div>
                 ))
+              )}
+            </div>
+          )}
+
+          {/* Tab Content: Semua Perangkat */}
+          {activeTab === 'devices' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {Object.keys(devices).length === 0 ? (
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem 0' }}>Belum ada perangkat yang terdaftar di sistem.</div>
+              ) : (
+                Object.entries(devices).map(([deviceId, devData]) => {
+                  const ownerName = users[devData.owner_uid]?.name || 'User Tidak Dikenal';
+                  const lastUpdated = devData.last_updated || 0;
+                  const isOnline = (currentTime - lastUpdated) <= 60 && lastUpdated > 0;
+                  
+                  return (
+                    <div key={deviceId} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ background: 'var(--surface-hover)', padding: '0.8rem', borderRadius: '50%' }}>
+                          <Server size={24} color="var(--primary)" />
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{devData.name || 'Alat Tanpa Nama'}</h3>
+                          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>ID: {deviceId} | Pemilik: {ownerName}</p>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        {isOnline ? (
+                          <span style={{ fontSize: '0.8rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
+                        )}
+                        <button 
+                          onClick={() => handleDeleteDeviceAdmin(deviceId, devData.name)}
+                          style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                        >
+                          Hapus Paksa
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           )}
@@ -392,12 +473,20 @@ function AdminDashboard({ view = 'dashboard' }) {
                                   </div>
 
                                   {/* Action Button for Admin */}
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); navigate(`/device/${deviceId}/config`); }}
-                                    style={{ width: '100%', background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
-                                  >
-                                    Lihat & Konfigurasi Alat
-                                  </button>
+                                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); navigate(`/device/${deviceId}/config`); }}
+                                      style={{ flex: 1, background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textAlign: 'center' }}
+                                    >
+                                      Konfigurasi
+                                    </button>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleDeleteDeviceAdmin(deviceId, devData.name); }}
+                                      style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.6rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      Hapus
+                                    </button>
+                                  </div>
                                 </div>
                               );
                             })
