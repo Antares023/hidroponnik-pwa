@@ -235,25 +235,25 @@ function AdminDashboard({ view = 'dashboard' }) {
       {view === 'dashboard' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
-            <Users size={28} color="#3b82f6" style={{ marginBottom: '0.5rem' }} />
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#3b82f6' }}>{totalActiveUsers}</div>
+            <Users size={28} color="var(--primary)" style={{ marginBottom: '0.5rem' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)' }}>{totalActiveUsers}</div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>User Aktif</div>
           </div>
           
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
-            <Clock size={28} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#ef4444' }}>{totalPending}</div>
+            <Clock size={28} color="var(--status-warning)" style={{ marginBottom: '0.5rem' }} />
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--status-warning)' }}>{totalPending}</div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Antrean User</div>
           </div>
 
           <div className="glass-card" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ background: 'rgba(34, 197, 94, 0.1)', padding: '0.8rem', borderRadius: '50%' }}>
-                <Server size={32} color="#22c55e" />
+              <div style={{ background: 'rgba(22, 66, 60, 0.1)', padding: '0.8rem', borderRadius: '50%' }}>
+                <Server size={32} color="var(--primary)" />
               </div>
               <div>
                 <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Total Alat Beroperasi</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#22c55e' }}>{totalDevices} <span style={{ fontSize: '0.9rem', fontWeight: 'normal', color: 'var(--text-muted)' }}>Unit ESP32</span></div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary)' }}>{totalDevices} <span style={{ fontSize: '0.9rem', fontWeight: 'normal', color: 'var(--text-muted)' }}>Unit ESP32</span></div>
               </div>
             </div>
           </div>
@@ -264,7 +264,7 @@ function AdminDashboard({ view = 'dashboard' }) {
       {view === 'users' && (
         <>
           {/* Tab Navigation dalam Kelola User */}
-          <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--surface-border)', marginBottom: '1.5rem', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid rgba(22, 66, 60, 0.1)', marginBottom: '1.5rem', overflowX: 'auto' }}>
             <button 
               onClick={() => setActiveTab('overview')}
               style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'overview' ? 700 : 500, borderBottom: activeTab === 'overview' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -297,13 +297,13 @@ function AdminDashboard({ view = 'dashboard' }) {
                 <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem 0' }}>Tidak ada antrean pendaftaran.</div>
               ) : (
                 pendingUsersList.map(([uid, user]) => (
-                  <div key={uid} className="glass-card" style={{ padding: '1.5rem', border: '1px solid rgba(234, 179, 8, 0.4)' }}>
+                  <div key={uid} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--status-warning)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{user.name}</h3>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, marginTop: '0.2rem' }}>{user.email}</p>
                       </div>
-                      <div style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#eab308', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', height: 'fit-content' }}>
+                      <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--status-warning)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', height: 'fit-content' }}>
                         Menunggu Persetujuan
                       </div>
                     </div>
@@ -331,7 +331,7 @@ function AdminDashboard({ view = 'dashboard' }) {
                   return (
                     <div key={deviceId} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ background: 'var(--surface-hover)', padding: '0.8rem', borderRadius: '50%' }}>
+                        <div style={{ background: 'rgba(22, 66, 60, 0.05)', padding: '0.8rem', borderRadius: '50%' }}>
                           <Server size={24} color="var(--primary)" />
                         </div>
                         <div>
@@ -341,9 +341,9 @@ function AdminDashboard({ view = 'dashboard' }) {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         {isOnline ? (
-                          <span style={{ fontSize: '0.8rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--primary)', background: 'rgba(22, 66, 60, 0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--status-critical)', background: 'rgba(239, 68, 68, 0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
                         )}
                         <button 
                           onClick={() => handleDeleteDeviceAdmin(deviceId, devData.name)}
@@ -380,10 +380,10 @@ function AdminDashboard({ view = 'dashboard' }) {
                       </div>
 
                       {isExpanded && (
-                        <div style={{ background: 'rgba(0,0,0,0.02)', padding: '1.5rem', borderTop: '1px solid var(--surface-border)' }}>
+                        <div style={{ background: 'rgba(22, 66, 60, 0.02)', padding: '1.5rem', borderTop: '1px solid rgba(22, 66, 60, 0.1)' }}>
                           
                           {/* ADMIN CONTROLS FOR USER */}
-                          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '1rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(22, 66, 60, 0.05)', paddingBottom: '1rem' }}>
                             <button onClick={() => startEditUser(uid, user)} className="btn-3d-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Edit Pengguna</button>
                             <button onClick={() => handleDeleteUser(uid, user.name)} className="btn-3d btn-danger" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Hapus Pengguna</button>
                           </div>

@@ -118,20 +118,20 @@ function AdminTickets() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
-          <Clock size={28} color="#eab308" style={{ marginBottom: '0.5rem' }} />
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#eab308' }}>{openTickets.length}</div>
+          <Clock size={28} color="var(--status-warning)" style={{ marginBottom: '0.5rem' }} />
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--status-warning)' }}>{openTickets.length}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Menunggu Penanganan</div>
         </div>
         
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
-          <CheckCircle2 size={28} color="#22c55e" style={{ marginBottom: '0.5rem' }} />
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#22c55e' }}>{closedTickets.length}</div>
+          <CheckCircle2 size={28} color="var(--primary)" style={{ marginBottom: '0.5rem' }} />
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)' }}>{closedTickets.length}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Selesai Ditangani</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>Daftar Tiket Berdasarkan User</h3>
+        <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', borderBottom: '1px solid rgba(22, 66, 60, 0.1)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>Daftar Tiket Berdasarkan User</h3>
         {Object.keys(ticketsByUser).length === 0 ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
             <FileText size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
@@ -143,10 +143,10 @@ function AdminTickets() {
             const hasOpen = userTickets.some(t => t.status === 'open');
 
             return (
-              <div key={uid} className="glass-card" style={{ padding: 0, overflow: 'hidden', borderLeft: hasOpen ? '4px solid #eab308' : '4px solid #22c55e' }}>
+              <div key={uid} className="glass-card" style={{ padding: 0, overflow: 'hidden', borderLeft: hasOpen ? '4px solid var(--status-warning)' : '4px solid var(--primary)' }}>
                 <div onClick={() => toggleExpandUser(uid)} style={{ padding: '1.2rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                    <div style={{ background: 'rgba(0,0,0,0.05)', padding: '0.6rem', borderRadius: '50%' }}>
+                    <div style={{ background: 'rgba(22, 66, 60, 0.05)', padding: '0.6rem', borderRadius: '50%' }}>
                       <User size={20} color="var(--primary)" />
                     </div>
                     <div>
