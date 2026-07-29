@@ -3,7 +3,7 @@ import { ref, onValue, set, query, orderByChild, equalTo, get, child, remove } f
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
-import { PlusCircle, Server, Settings as SettingsIcon, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { PlusCircle, Server, Settings as SettingsIcon, SlidersHorizontal, Trash2, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function UserDeviceManager() {
@@ -122,12 +122,52 @@ function UserDeviceManager() {
     }
   };
 
+  const handleEditDeviceName = async (e, deviceId, currentName) => {
+    e.stopPropagation();
+    const { value: newName } = await Swal.fire({
+      customClass: {
+        popup: 'glass-swal',
+        title: 'glass-swal-title',
+        htmlContainer: 'glass-swal-content',
+        confirmButton: 'glass-swal-confirm',
+        cancelButton: 'glass-swal-cancel',
+        input: 'glass-swal-input'
+      },
+      title: 'Ubah Nama Alat',
+      input: 'text',
+      inputLabel: 'Nama Baru',
+      inputValue: currentName || '',
+      showCancelButton: true,
+      confirmButtonText: 'Simpan',
+      cancelButtonText: 'Batal',
+      inputValidator: (value) => {
+        if (!value) return 'Nama alat tidak boleh kosong!';
+      }
+    });
+
+    if (newName && newName !== currentName) {
+      try {
+        await set(ref(database, `devices/${deviceId}/name`), newName);
+        Swal.fire({
+          customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+          title: 'Berhasil!',
+          text: 'Nama alat berhasil diubah.',
+          icon: 'success'
+        });
+      } catch (error) {
+        Swal.fire({
+          customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+          title: 'Gagal!',
+          text: error.message,
+          icon: 'error'
+        });
+      }
+    }
+  };
+
   return (
     <div className="device-manager">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2 className="title-gradient" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <SlidersHorizontal size={24} /> Kelola Alat
-        </h2>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '2rem' }}>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
           className="btn-3d"
@@ -201,6 +241,14 @@ function UserDeviceManager() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', marginTop: '1.2rem', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '1rem' }}>
+                  <button 
+                    onClick={(e) => handleEditDeviceName(e, deviceId, devData.name)}
+                    className="btn-3d"
+                    style={{ padding: '0.6rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Edit Nama"
+                  >
+                    <Edit2 size={16} />
+                  </button>
                   <button 
                     onClick={(e) => handleDeleteDevice(e, deviceId, devData.name)}
                     className="btn-3d btn-danger"

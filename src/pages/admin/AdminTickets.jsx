@@ -108,9 +108,7 @@ function AdminTickets() {
   return (
     <div className="admin-tickets" style={{ paddingBottom: '2rem' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h2 className="title-gradient" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <LifeBuoy size={24} /> Pusat Pengaduan
-        </h2>
+        {/* Title moved to header */}
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
           Pantau dan tangani kendala sistem dari pengguna.
         </p>

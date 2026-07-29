@@ -100,9 +100,6 @@ function Profile() {
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
-      <h2 className="title-gradient" style={{ fontSize: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <User /> Profil Saya
-      </h2>
 
       {/* Identitas Diri */}
       <div className="glass-card" style={{ marginBottom: '2rem' }}>
@@ -190,17 +187,6 @@ function Profile() {
         )}
       </div>
 
-      {/* Logout Area */}
-      <div style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '1rem' }}>
-        <button 
-          onClick={handleLogout}
-          className="btn-3d btn-danger"
-          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderRadius: '2rem' }}
-        >
-          <LogOut size={18} />
-          Keluar
-        </button>
-      </div>
 
     </div>
   );

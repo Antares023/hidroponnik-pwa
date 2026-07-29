@@ -128,10 +128,7 @@ function UserTickets() {
 
   return (
     <div className="user-tickets" style={{ paddingBottom: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2 className="title-gradient" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <LifeBuoy size={24} /> Pengaduan Saya
-        </h2>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '2rem' }}>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
           className="btn-3d"

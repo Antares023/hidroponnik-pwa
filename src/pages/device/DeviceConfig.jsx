@@ -89,9 +89,6 @@ function DeviceConfig() {
     <div className="device-config">
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
         <Link to="/devices" style={{ color: 'var(--text-main)' }}><ArrowLeft size={24} /></Link>
-        <h2 className="title-gradient" style={{ margin: 0, fontSize: '1.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <SettingsIcon size={24} /> Konfigurasi Alat
-        </h2>
       </div>
 
       <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>

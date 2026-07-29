@@ -6,7 +6,7 @@ import { Thermometer, Droplets, FlaskConical, Beaker, CloudRain, Server, AlertTr
 import { Link } from 'react-router-dom';
 
 const IndicatorCard = ({ title, value, unit, icon: Icon, statusClass }) => (
-  <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
+  <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column' }}>
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
         <Icon size={18} />
@@ -154,10 +154,7 @@ function UserDashboard() {
 
   return (
     <div className="user-dashboard">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 className="title-gradient" style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <LayoutDashboard size={24} /> Dashboard Monitor
-        </h2>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1.5rem' }}>
       </div>
 
       {Object.keys(devices).length === 0 ? (
@@ -177,9 +174,9 @@ function UserDashboard() {
                 onChange={(e) => setSelectedDeviceId(e.target.value)}
                 style={{ width: '100%', padding: '0.8rem 1rem', paddingRight: '2.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--surface-border)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600, appearance: 'none', cursor: 'pointer', outline: 'none' }}
               >
-                {Object.entries(devices).map(([id]) => (
+                {Object.entries(devices).map(([id, device]) => (
                   <option key={id} value={id}>
-                    ID: {id}
+                    {device.name || id}
                   </option>
                 ))}
               </select>

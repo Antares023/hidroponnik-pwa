@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, set, remove } from 'firebase/database';
+import { ref, onValue, set, remove, get, child } from 'firebase/database';
 import { database } from '../../firebase';
 import Swal from 'sweetalert2';
-import { Users, Server, CheckCircle, XCircle, Activity, Clock, ChevronDown, ChevronUp, Droplets, Thermometer, FlaskConical, LayoutDashboard } from 'lucide-react';
+import { Users, Server, CheckCircle, XCircle, Activity, Clock, ChevronDown, ChevronUp, Droplets, Thermometer, FlaskConical, LayoutDashboard, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function AdminDashboard({ view = 'dashboard' }) {
@@ -218,6 +218,97 @@ function AdminDashboard({ view = 'dashboard' }) {
     }
   };
 
+  const handleEditDeviceAdmin = async (e, oldDeviceId, currentName) => {
+    e.stopPropagation();
+    const { value: formValues } = await Swal.fire({
+      customClass: {
+        popup: 'glass-swal',
+        title: 'glass-swal-title',
+        htmlContainer: 'glass-swal-content',
+        confirmButton: 'glass-swal-confirm',
+        cancelButton: 'glass-swal-cancel'
+      },
+      title: 'Ubah Data Alat',
+      html: `
+        <div style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; display: block;">ID Alat Baru</label>
+            <input id="swal-dev-id" class="swal2-input" style="margin: 0; width: 100%; font-size: 0.9rem;" value="${oldDeviceId}">
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; display: block;">Nama Alat</label>
+            <input id="swal-dev-name" class="swal2-input" style="margin: 0; width: 100%; font-size: 0.9rem;" value="${currentName || ''}">
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Simpan',
+      cancelButtonText: 'Batal',
+      preConfirm: () => {
+        return {
+          newId: document.getElementById('swal-dev-id').value,
+          newName: document.getElementById('swal-dev-name').value
+        }
+      }
+    });
+
+    if (formValues) {
+      const { newId, newName } = formValues;
+      if (!newId || !newName) {
+        Swal.fire({
+          customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+          title: 'Gagal',
+          text: 'ID dan Nama Alat tidak boleh kosong!',
+          icon: 'error'
+        });
+        return;
+      }
+      
+      try {
+        if (newId !== oldDeviceId) {
+          // Check if new ID exists
+          const snapshot = await get(child(ref(database), `devices/${newId}/owner_uid`));
+          if (snapshot.exists()) {
+            Swal.fire({
+              customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+              title: 'Gagal',
+              text: 'ID Alat tersebut sudah terpakai!',
+              icon: 'error'
+            });
+            return;
+          }
+          
+          // Move device
+          const oldSnapshot = await get(ref(database, `devices/${oldDeviceId}`));
+          if (oldSnapshot.exists()) {
+            const data = oldSnapshot.val();
+            data.name = newName; // update name
+            await set(ref(database, `devices/${newId}`), data);
+            await remove(ref(database, `devices/${oldDeviceId}`));
+          }
+        } else if (newName !== currentName) {
+          // Just update name
+          await set(ref(database, `devices/${oldDeviceId}/name`), newName);
+        }
+        
+        Swal.fire({
+          customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+          title: 'Berhasil!',
+          text: 'Data alat berhasil diubah.',
+          icon: 'success'
+        });
+      } catch (error) {
+        Swal.fire({
+          customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+          title: 'Gagal!',
+          text: error.message,
+          icon: 'error'
+        });
+      }
+    }
+  };
+
   // Derived State (Calculations)
   const pendingUsersList = Object.entries(users).filter(([_, user]) => user.status === 'pending' && user.role !== 'master_admin');
   const activeUsersList = Object.entries(users).filter(([_, user]) => user.status === 'approved' && user.role !== 'master_admin');
@@ -228,8 +319,7 @@ function AdminDashboard({ view = 'dashboard' }) {
 
   return (
     <div className="admin-dashboard" style={{ maxWidth: '800px', margin: '0 auto' }}>
-      {view === 'dashboard' && <h2 className="title-gradient" style={{ fontSize: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><LayoutDashboard size={24} /> Dashboard Statistik</h2>}
-      {view === 'users' && <h2 className="title-gradient" style={{ fontSize: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Users size={24} /> Manajemen User</h2>}
+      {/* Titles moved to global header */}
 
       {/* === DASHBOARD VIEW === */}
       {view === 'dashboard' && (
@@ -480,6 +570,14 @@ function AdminDashboard({ view = 'dashboard' }) {
                                       style={{ flex: 1, padding: '0.6rem', fontSize: '0.8rem', textAlign: 'center' }}
                                     >
                                       Konfigurasi
+                                    </button>
+                                    <button 
+                                      onClick={(e) => handleEditDeviceAdmin(e, deviceId, devData.name)}
+                                      className="btn-3d"
+                                      style={{ padding: '0.6rem 0.8rem', fontSize: '0.8rem' }}
+                                      title="Edit Alat"
+                                    >
+                                      <Edit2 size={16} />
                                     </button>
                                     <button 
                                       onClick={(e) => { e.stopPropagation(); handleDeleteDeviceAdmin(deviceId, devData.name); }}
