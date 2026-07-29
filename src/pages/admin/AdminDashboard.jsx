@@ -12,12 +12,12 @@ function AdminDashboard({ view = 'dashboard' }) {
   const [expandedUsers, setExpandedUsers] = useState({});
   const [editingUserId, setEditingUserId] = useState(null);
   const [editFormData, setEditFormData] = useState({ name: '', phone: '', institution: '' });
-  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
     // Clock for Online/Offline check (update every 5 seconds)
-    const timer = setInterval(() => setCurrentTime(Math.floor(Date.now() / 1000)), 5000);
+    const timer = setInterval(() => setCurrentTime(Date.now()), 5000);
     return () => clearInterval(timer);
   }, []);
 
@@ -507,7 +507,8 @@ function AdminDashboard({ view = 'dashboard' }) {
                           ) : (
                             userDevices.map(([deviceId, devData]) => {
                               const lastUpdated = devData.last_updated || 0;
-                              const isOnline = (currentTime - lastUpdated) <= 60 && lastUpdated > 0;
+                              const lastUpdatedMs = lastUpdated < 10000000000 ? lastUpdated * 1000 : lastUpdated;
+                              const isOnline = (currentTime - lastUpdatedMs) <= 60000 && lastUpdated > 0;
                               const sensors = devData.sensor_data || {};
                               const temp = sensors.suhu_air || 0;
                               const tds = sensors.tds || 0;

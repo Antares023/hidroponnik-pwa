@@ -12,11 +12,11 @@ function UserDeviceManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMac, setNewMac] = useState('');
   const [newName, setNewName] = useState('');
-  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(Math.floor(Date.now() / 1000)), 5000);
+    const timer = setInterval(() => setCurrentTime(Date.now()), 5000);
     return () => clearInterval(timer);
   }, []);
 
@@ -212,7 +212,8 @@ function UserDeviceManager() {
         ) : (
           Object.entries(devices).map(([deviceId, devData]) => {
             const lastUpdated = devData.last_updated || 0;
-            const isOnline = (currentTime - lastUpdated) <= 60 && lastUpdated > 0;
+            const lastUpdatedMs = lastUpdated < 10000000000 ? lastUpdated * 1000 : lastUpdated;
+            const isOnline = (currentTime - lastUpdatedMs) <= 60000 && lastUpdated > 0;
             
             return (
               <div 
