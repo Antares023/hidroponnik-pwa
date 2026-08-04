@@ -218,9 +218,8 @@ function UserDeviceManager() {
             return (
               <div 
                 key={deviceId} 
-                className="glass-card device-card-hover" 
-                onClick={() => navigate(`/device/${deviceId}/config`)}
-                style={{ cursor: 'pointer', padding: '1.2rem' }}
+                className="glass-card" 
+                style={{ padding: '1.2rem' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -259,9 +258,14 @@ function UserDeviceManager() {
                     <Trash2 size={16} />
                   </button>
                   
-                  <div className="btn-3d-secondary" style={{ padding: '0.6rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Konfigurasi">
+                  <button 
+                    onClick={() => navigate(`/device/${deviceId}/config`)}
+                    className="btn-3d-secondary" 
+                    style={{ padding: '0.6rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                    title="Konfigurasi"
+                  >
                     <SettingsIcon size={16} color="var(--text-main)" />
-                  </div>
+                  </button>
                 </div>
               </div>
             );
