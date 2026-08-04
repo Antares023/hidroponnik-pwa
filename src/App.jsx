@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate, useParams, useLocation } from 'react-router-dom';
-import { LayoutDashboard, SlidersHorizontal, Settings as SettingsIcon, Users, User, Clock, LifeBuoy, LogOut } from 'lucide-react';
+import { LayoutDashboard, SlidersHorizontal, Settings as SettingsIcon, Users, User, Clock, LifeBuoy, LogOut, Power } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/auth/Login';
@@ -125,26 +125,26 @@ const AppLayout = () => {
   return (
     <div className="app-container">
       {/* Top Header (Glassmorphism) */}
-      <header className="glass-header" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', position: 'sticky', top: 0, zIndex: 40 }}>
+      <header className="glass-header" style={{ marginBottom: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem clamp(1rem, 3vw, 1.25rem)', position: 'sticky', top: 0, zIndex: 40 }}>
         <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-          <img src="/pwa-192x192.png" alt="Logo" style={{ height: '42px', width: '42px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.8)', boxShadow: 'var(--shadow-outer)' }} />
+          <img src="/pwa-192x192.png" alt="Logo" style={{ height: 'clamp(36px, 10vw, 42px)', width: 'clamp(36px, 10vw, 42px)', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.8)', boxShadow: 'var(--shadow-outer)' }} />
         </div>
         
         <div style={{ flex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <h1 className="title-gradient" style={{ fontSize: 'clamp(1.1rem, 4vw, 1.5rem)', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '0.4rem', textAlign: 'center' }}>
+          <h1 className="title-gradient" style={{ fontSize: 'clamp(1rem, 4.5vw, 1.5rem)', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '0.4rem', textAlign: 'center' }}>
             {pageInfo.icon}
-            {pageInfo.title}
+            <span style={{ fontSize: 'clamp(1rem, 4.5vw, 1.5rem)' }}>{pageInfo.title}</span>
           </h1>
         </div>
         
         <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={handleLogout} className="btn-3d btn-danger" style={{ height: '42px', width: '42px', padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Logout">
-            <LogOut size={20} color="#fff" />
+          <button onClick={handleLogout} className="btn-3d btn-danger" style={{ height: 'clamp(36px, 10vw, 42px)', width: 'clamp(36px, 10vw, 42px)', padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Logout">
+            <Power size={18} color="#fff" />
           </button>
         </div>
       </header>
 
-      <main style={{ padding: '0 1rem 1rem 1rem', maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <main style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem) 1rem 3rem 1rem', maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         <Routes>
           <Route path="/" element={userRole === 'master_admin' ? <AdminDashboard view="dashboard" /> : <UserDashboard />} />
           <Route path="/users" element={userRole === 'master_admin' ? <AdminDashboard view="users" /> : <Navigate to="/" />} />

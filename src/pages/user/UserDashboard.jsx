@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import { ref, onValue, set, query, orderByChild, equalTo } from 'firebase/database';
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import { Thermometer, Droplets, FlaskConical, Beaker, CloudRain, Server, AlertTriangle, LayoutDashboard, Power, SettingsIcon, SlidersHorizontal } from 'lucide-react';
+import { Thermometer, Droplets, FlaskConical, Beaker, CloudRain, Server, AlertTriangle, LayoutDashboard, Power, SettingsIcon, SlidersHorizontal, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import Swal from 'sweetalert2';
 
 const IndicatorCard = ({ title, value, unit, icon: Icon, statusClass }) => (
   <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -28,6 +32,7 @@ function UserDashboard() {
   const [data, setData] = useState(null);
   const [settings, setSettings] = useState(null);
   const [controls, setControls] = useState(null);
+  const [historyData, setHistoryData] = useState([]);
 
   // Fetch User's Devices for Dropdown
   useEffect(() => {
@@ -77,10 +82,33 @@ function UserDashboard() {
       }
     });
 
+    const historyRef = ref(database, `devices/${selectedDeviceId}/history`);
+    const unsubHistory = onValue(historyRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const histObj = snapshot.val();
+        // Convert object to array, filter out nulls, sort by timestamp
+        const histArray = Object.values(histObj)
+          .filter(item => item !== null && item.timestamp)
+          .sort((a, b) => a.timestamp - b.timestamp)
+          .map(item => {
+            const date = new Date(item.timestamp);
+            return {
+              ...item,
+              time: `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`,
+              fullDate: date.toLocaleString('id-ID')
+            };
+          });
+        setHistoryData(histArray);
+      } else {
+        setHistoryData([]);
+      }
+    });
+
     return () => {
       unsubData();
       unsubSettings();
       unsubControls();
+      unsubHistory();
     };
   }, [selectedDeviceId]);
 
@@ -133,29 +161,58 @@ function UserDashboard() {
     );
   };
 
-  const toggleMode = async (mode) => {
-    if (!selectedDeviceId) return;
-    try {
-      await set(ref(database, `devices/${selectedDeviceId}/controls/mode`), mode);
-    } catch (err) {
-      alert("Gagal mengubah mode.");
-    }
-  };
 
-  const togglePump = async (pumpName) => {
-    if (!selectedDeviceId || !controls) return;
-    const newValue = !controls[pumpName];
-    try {
-      await set(ref(database, `devices/${selectedDeviceId}/controls/${pumpName}`), newValue);
-    } catch (err) {
-      alert("Gagal merubah status pompa");
+
+  const handleDownloadPDF = () => {
+    if (!historyData || historyData.length === 0) {
+      Swal.fire({
+        title: 'Data Kosong',
+        text: 'Belum ada data history untuk diunduh. Tunggu beberapa saat agar alat mengirimkan data pertama.',
+        icon: 'warning',
+        confirmButtonColor: '#16423c'
+      });
+      return;
     }
+
+    const doc = new jsPDF();
+    const deviceName = devices[selectedDeviceId]?.name || selectedDeviceId;
+    
+    // Header
+    doc.setFontSize(18);
+    doc.text('Laporan Sensor Hidroponik', 14, 20);
+    doc.setFontSize(11);
+    doc.text(`ID Device: ${selectedDeviceId}`, 14, 28);
+    doc.text(`Nama Device: ${deviceName}`, 14, 34);
+    doc.text(`Waktu Unduh: ${new Date().toLocaleString('id-ID')}`, 14, 40);
+
+    // Table Data
+    const tableColumn = ["Waktu", "pH", "TDS (ppm)", "Suhu Air (C)"];
+    const tableRows = [];
+
+    historyData.forEach(item => {
+      const rowData = [
+        item.fullDate,
+        item.ph?.toFixed(2) || '-',
+        item.tds?.toFixed(0) || '-',
+        item.suhu_air?.toFixed(1) || '-'
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 45,
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [22, 101, 52] } // Dark green
+    });
+
+    doc.save(`Laporan_Hidroponik_${selectedDeviceId}.pdf`);
   };
 
   return (
     <div className="user-dashboard">
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '1.5rem' }}>
-      </div>
 
       {Object.keys(devices).length === 0 ? (
         <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
@@ -165,9 +222,9 @@ function UserDashboard() {
         </div>
       ) : (
         <>
-          {/* Active Device Selector */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ position: 'relative' }}>
+          {/* Active Device Selector & PDF Download */}
+          <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
               <select 
                 className="glass-panel"
                 value={selectedDeviceId} 
@@ -184,10 +241,20 @@ function UserDashboard() {
                 <Server size={18} color="var(--primary)" />
               </div>
             </div>
+            <button 
+              onClick={handleDownloadPDF} 
+              className="btn-3d" 
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0 1rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              <Download size={18} />
+              <span className="hide-on-mobile">Unduh PDF</span>
+            </button>
           </div>
 
           {/* Smart Alerts */}
           {generateAlerts()}
+
+
 
           {/* Telemetry Grid */}
           <div className="dashboard-grid">
@@ -230,115 +297,40 @@ function UserDashboard() {
             </div>
           </div>
 
-          {/* Mode Control & Manual Control Panel */}
-          {controls && (
-            <div style={{ marginTop: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 className="title-gradient" style={{ fontSize: '1.2rem', margin: 0 }}>Sistem Kontrol</h3>
-                
-                {/* Auto/Manual Toggle Switch */}
-                <div style={{ display: 'flex', gap: '0.5rem', background: 'transparent', padding: '0.2rem' }}>
-                  <button 
-                    onClick={() => toggleMode('auto')}
-                    className={controls.mode === 'auto' ? 'btn-3d' : 'btn-3d-secondary'}
-                    style={{ padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', flex: 1 }}
-                  >
-                    Otomatis
-                  </button>
-                  <button 
-                    onClick={() => toggleMode('manual')}
-                    className={controls.mode === 'manual' ? 'btn-3d btn-danger' : 'btn-3d-secondary'}
-                    style={{ padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', flex: 1 }}
-                  >
-                    Manual
-                  </button>
-                </div>
+          {/* History Chart */}
+          <div className="glass-card-concave" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
+            <h3 className="title-gradient" style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <LayoutDashboard size={18} /> Grafik Riwayat Sensor
+            </h3>
+            
+            {historyData && historyData.length > 0 ? (
+              <div style={{ width: '100%', height: 260 }}>
+                <ResponsiveContainer>
+                  <LineChart data={historyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(22, 66, 60, 0.1)" />
+                    <XAxis dataKey="time" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                    <YAxis yAxisId="left" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: '1px solid rgba(255,255,255,0.4)', boxShadow: 'var(--shadow-outer)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '0.8rem', paddingTop: '10px' }} />
+                    <Line yAxisId="left" type="monotone" dataKey="tds" stroke="var(--primary)" name="TDS (ppm)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    <Line yAxisId="right" type="monotone" dataKey="ph" stroke="var(--status-critical)" name="pH Air" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    <Line yAxisId="right" type="monotone" dataKey="suhu_air" stroke="#f59e0b" name="Suhu Air (°C)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    <Line yAxisId="right" type="monotone" dataKey="suhu_ruangan" stroke="#10b981" name="Suhu Udara (°C)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    <Line yAxisId="right" type="monotone" dataKey="kelembapan" stroke="#3b82f6" name="Kelembapan (%)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
+            ) : (
+              <div style={{ width: '100%', height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                <em>Menunggu pengiriman data history pertama dari alat...</em>
+              </div>
+            )}
+          </div>
 
-              {controls.mode === 'auto' ? (
-                <div className="glass-card" style={{ padding: '1rem', borderLeft: '4px solid var(--primary)', background: 'rgba(16, 185, 129, 0.05)' }}>
-                  <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    <strong>Mode Otomatis Aktif.</strong> Pompa akan dikendalikan otomatis oleh ESP32 berdasarkan ambang batas konfigurasi alat. Beralih ke Manual untuk mengontrol pompa sendiri.
-                  </p>
-                </div>
-              ) : (
-                <div className="glass-card">
-                  <div style={{ background: 'rgba(234, 179, 8, 0.1)', borderLeft: '4px solid #eab308', padding: '1rem', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    <strong>Peringatan Manual:</strong> Pompa tidak akan mempedulikan sensor. Pastikan Anda mengawasinya agar tanaman tidak kelebihan/kekurangan nutrisi.
-                  </div>
 
-                  <div style={{ display: 'grid', gap: '1rem' }}>
-                    <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>Pompa Air Utama</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sirkulasi keseluruhan</div>
-                      </div>
-                      <button 
-                        onClick={() => togglePump('pump_main')}
-                        className={controls.pump_main ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                      >
-                        <Power size={16} /> {controls.pump_main ? 'ON' : 'OFF'}
-                      </button>
-                    </div>
-
-                    <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>Pompa Nutrisi A</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pekatan A</div>
-                      </div>
-                      <button 
-                        onClick={() => togglePump('pump_nutrisi_a')}
-                        className={controls.pump_nutrisi_a ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                      >
-                        <Power size={16} /> {controls.pump_nutrisi_a ? 'ON' : 'OFF'}
-                      </button>
-                    </div>
-
-                    <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>Pompa Nutrisi B</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pekatan B</div>
-                      </div>
-                      <button 
-                        onClick={() => togglePump('pump_nutrisi_b')}
-                        className={controls.pump_nutrisi_b ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                      >
-                        <Power size={16} /> {controls.pump_nutrisi_b ? 'ON' : 'OFF'}
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
-                      <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontWeight: 600 }}>pH UP</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Menaikkan pH</div>
-                        </div>
-                        <button 
-                          onClick={() => togglePump('pump_ph_up')}
-                          className={controls.pump_ph_up ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                        >
-                          <Power size={16} /> {controls.pump_ph_up ? 'ON' : 'OFF'}
-                        </button>
-                      </div>
-
-                      <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontWeight: 600 }}>pH DOWN</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Menurunkan pH</div>
-                        </div>
-                        <button 
-                          onClick={() => togglePump('pump_ph_down')}
-                          className={controls.pump_ph_down ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                        >
-                          <Power size={16} /> {controls.pump_ph_down ? 'ON' : 'OFF'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </>
       )}
     </div>

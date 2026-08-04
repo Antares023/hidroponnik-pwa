@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ref, onValue, set, remove, get, child } from 'firebase/database';
 import { database } from '../../firebase';
 import Swal from 'sweetalert2';
-import { Users, Server, CheckCircle, XCircle, Activity, Clock, ChevronDown, ChevronUp, Droplets, Thermometer, FlaskConical, LayoutDashboard, Edit2 } from 'lucide-react';
+import { Users, Server, CheckCircle, XCircle, Activity, Clock, ChevronDown, ChevronUp, Droplets, Thermometer, FlaskConical, LayoutDashboard, Edit2, CloudRain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function AdminDashboard({ view = 'dashboard' }) {
@@ -324,19 +324,19 @@ function AdminDashboard({ view = 'dashboard' }) {
       {/* === DASHBOARD VIEW === */}
       {view === 'dashboard' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
+          <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
             <Users size={28} color="var(--primary)" style={{ marginBottom: '0.5rem' }} />
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)' }}>{totalActiveUsers}</div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>User Aktif</div>
           </div>
           
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
+          <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem 1rem' }}>
             <Clock size={28} color="var(--status-warning)" style={{ marginBottom: '0.5rem' }} />
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--status-warning)' }}>{totalPending}</div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Antrean User</div>
           </div>
 
-          <div className="glass-card" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem' }}>
+          <div className="glass-card-concave" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ background: 'rgba(22, 66, 60, 0.1)', padding: '0.8rem', borderRadius: '50%' }}>
                 <Server size={32} color="var(--primary)" />
@@ -513,12 +513,12 @@ function AdminDashboard({ view = 'dashboard' }) {
                               const temp = sensors.suhu_air || 0;
                               const tds = sensors.tds || 0;
                               const ph = sensors.ph || 0;
+                              const suhu_ruangan = sensors.suhu_ruangan || 0;
+                              const kelembapan = sensors.kelembapan || 0;
 
                               return (
                                 <div key={deviceId} 
-                                     onClick={() => navigate(`/device/${deviceId}`)}
-                                     style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'var(--transition)', marginBottom: '0.5rem' }}
-                                     className="device-card-hover"
+                                     style={{ background: 'var(--surface)', border: '1px solid var(--surface-border)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem' }}
                                 >
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.75rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -539,27 +539,41 @@ function AdminDashboard({ view = 'dashboard' }) {
                                     )}
                                   </div>
                                   
-                                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                                    <div style={{ flex: 1, background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                                        <Thermometer size={14} color="var(--status-warning)" />
-                                        <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Suhu Air</span>
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.3rem', marginBottom: '1rem' }}>
+                                    <div style={{ background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                                        <Droplets size={12} color="var(--primary)" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>TDS</span>
                                       </div>
-                                      <div style={{ fontSize: '1rem', fontWeight: 700 }}>{temp.toFixed(1)}<span style={{ fontSize: '0.7rem', fontWeight: 'normal', marginLeft: '2px' }}>°C</span></div>
+                                      <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{tds.toFixed(0)}</div>
                                     </div>
-                                    <div style={{ flex: 1, background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                                        <Droplets size={14} color="var(--primary)" />
-                                        <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>TDS</span>
+                                    <div style={{ background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                                        <FlaskConical size={12} color="var(--status-critical)" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>pH</span>
                                       </div>
-                                      <div style={{ fontSize: '1rem', fontWeight: 700 }}>{tds.toFixed(0)}<span style={{ fontSize: '0.7rem', fontWeight: 'normal', marginLeft: '2px' }}>PPM</span></div>
+                                      <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{ph.toFixed(1)}</div>
                                     </div>
-                                    <div style={{ flex: 1, background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                                        <FlaskConical size={14} color="var(--status-critical)" />
-                                        <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>pH</span>
+                                    <div style={{ background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                                        <Thermometer size={12} color="var(--status-warning)" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>S.Air</span>
                                       </div>
-                                      <div style={{ fontSize: '1rem', fontWeight: 700 }}>{ph.toFixed(1)}</div>
+                                      <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{temp.toFixed(1)}</div>
+                                    </div>
+                                    <div style={{ background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                                        <Thermometer size={12} color="var(--text-main)" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>S.Udara</span>
+                                      </div>
+                                      <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{suhu_ruangan.toFixed(1)}</div>
+                                    </div>
+                                    <div style={{ background: 'rgba(0,0,0,0.03)', padding: '0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                                        <CloudRain size={12} color="#3b82f6" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>RH%</span>
+                                      </div>
+                                      <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{kelembapan.toFixed(0)}</div>
                                     </div>
                                   </div>
 
