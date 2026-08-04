@@ -126,7 +126,7 @@ function DeviceConfig() {
         </div>
       </div>
 
-      <div className="glass-card-concave" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.4rem' }}>
+      <div className="glass-card-concave" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.4rem', borderRadius: '16px' }}>
         <button 
           onClick={() => setActiveTab('kontrol')} 
           className={activeTab === 'kontrol' ? 'btn-3d' : ''}

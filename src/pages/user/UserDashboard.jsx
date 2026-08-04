@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { ref, onValue, set, query, orderByChild, equalTo } from 'firebase/database';
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import { Thermometer, Droplets, FlaskConical, Beaker, CloudRain, Server, AlertTriangle, LayoutDashboard, Power, SettingsIcon, SlidersHorizontal, Download } from 'lucide-react';
+import { Thermometer, Droplets, FlaskConical, Beaker, CloudRain, Server, AlertTriangle, LayoutDashboard, Power, SettingsIcon, SlidersHorizontal, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import Swal from 'sweetalert2';
+
+const PdfIcon = ({ size = 18, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+    <polyline points="14 2 14 8 20 8"></polyline>
+    <text x="5" y="17" fontSize="7" fontWeight="bold" stroke="none" fill={color} fontFamily="sans-serif">PDF</text>
+  </svg>
+);
 
 const IndicatorCard = ({ title, value, unit, icon: Icon, statusClass }) => (
   <div className="glass-card-concave" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -246,7 +254,7 @@ function UserDashboard() {
               className="btn-3d" 
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0 1rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
-              <Download size={18} />
+              <PdfIcon size={18} />
               <span className="hide-on-mobile">Unduh PDF</span>
             </button>
           </div>

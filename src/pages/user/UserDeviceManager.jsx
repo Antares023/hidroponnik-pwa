@@ -259,7 +259,7 @@ function UserDeviceManager() {
                     <Trash2 size={16} />
                   </button>
                   
-                  <div style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="btn-3d-secondary" style={{ padding: '0.6rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Konfigurasi">
                     <SettingsIcon size={16} color="var(--text-main)" />
                   </div>
                 </div>

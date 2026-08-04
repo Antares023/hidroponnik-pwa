@@ -445,3 +445,9 @@ button {
   background: #Fdf6ef;
   color: var(--text-main);
 }
+
+@media (max-width: 600px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
