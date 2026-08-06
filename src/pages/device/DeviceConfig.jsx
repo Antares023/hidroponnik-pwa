@@ -21,7 +21,7 @@ function DeviceConfig() {
 
   useEffect(() => {
     if (!deviceId) return;
-    
+
     const settingsRef = ref(database, `devices/${deviceId}/settings`);
     const unsubSettings = onValue(settingsRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -44,7 +44,7 @@ function DeviceConfig() {
 
   const handleSaveSettings = async (e) => {
     e.preventDefault();
-    
+
     const swalConfig = {
       customClass: {
         popup: 'glass-swal',
@@ -127,15 +127,15 @@ function DeviceConfig() {
       </div>
 
       <div className="glass-card-concave" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.4rem', borderRadius: '16px' }}>
-        <button 
-          onClick={() => setActiveTab('kontrol')} 
+        <button
+          onClick={() => setActiveTab('kontrol')}
           className={activeTab === 'kontrol' ? 'btn-3d' : ''}
           style={{ flex: 1, padding: 'clamp(0.6rem, 2vw, 0.8rem)', fontSize: 'clamp(0.8rem, 3vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'kontrol' ? 'white' : 'var(--text-main)', background: activeTab === 'kontrol' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'kontrol' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)' }}
         >
           🎛️ Kontrol Pompa
         </button>
-        <button 
-          onClick={() => setActiveTab('konfigurasi')} 
+        <button
+          onClick={() => setActiveTab('konfigurasi')}
           className={activeTab === 'konfigurasi' ? 'btn-3d' : ''}
           style={{ flex: 1, padding: 'clamp(0.6rem, 2vw, 0.8rem)', fontSize: 'clamp(0.8rem, 3vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'konfigurasi' ? 'white' : 'var(--text-main)', background: activeTab === 'konfigurasi' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'konfigurasi' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)' }}
         >
@@ -147,17 +147,17 @@ function DeviceConfig() {
         <div style={{ marginTop: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 className="title-gradient" style={{ fontSize: '1.2rem', margin: 0 }}>Sistem Kontrol</h3>
-            
+
             {/* Auto/Manual Toggle Switch */}
             <div style={{ display: 'flex', gap: '0.5rem', background: 'transparent', padding: '0.2rem' }}>
-              <button 
+              <button
                 onClick={() => toggleMode('auto')}
                 className={controls.mode === 'auto' ? 'btn-3d' : 'btn-3d-secondary'}
                 style={{ padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', flex: 1 }}
               >
                 Otomatis
               </button>
-              <button 
+              <button
                 onClick={() => toggleMode('manual')}
                 className={controls.mode === 'manual' ? 'btn-3d btn-danger' : 'btn-3d-secondary'}
                 style={{ padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.8rem', flex: 1 }}
@@ -182,14 +182,14 @@ function DeviceConfig() {
               <div style={{ display: 'grid', gap: '1rem' }}>
                 <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontWeight: 600 }}>Pompa Air Utama</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sirkulasi keseluruhan</div>
+                    <div style={{ fontWeight: 600 }}>Pompa Pestisida</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Penyemprotan hama</div>
                   </div>
-                  <button 
-                    onClick={() => togglePump('pump_main')}
-                    className={controls.pump_main ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
+                  <button
+                    onClick={() => togglePump('pump_pestisida')}
+                    className={controls.pump_pestisida ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                   >
-                    <Power size={16} /> {controls.pump_main ? 'ON' : 'OFF'}
+                    <Power size={16} /> {controls.pump_pestisida ? 'ON' : 'OFF'}
                   </button>
                 </div>
 
@@ -198,7 +198,7 @@ function DeviceConfig() {
                     <div style={{ fontWeight: 600 }}>Pompa Nutrisi A</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pekatan A</div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => togglePump('pump_nutrisi_a')}
                     className={controls.pump_nutrisi_a ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                   >
@@ -211,7 +211,7 @@ function DeviceConfig() {
                     <div style={{ fontWeight: 600 }}>Pompa Nutrisi B</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pekatan B</div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => togglePump('pump_nutrisi_b')}
                     className={controls.pump_nutrisi_b ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                   >
@@ -225,7 +225,7 @@ function DeviceConfig() {
                       <div style={{ fontWeight: 600 }}>pH UP</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Menaikkan pH</div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => togglePump('pump_ph_up')}
                       className={controls.pump_ph_up ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                     >
@@ -238,7 +238,7 @@ function DeviceConfig() {
                       <div style={{ fontWeight: 600 }}>pH DOWN</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Menurunkan pH</div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => togglePump('pump_ph_down')}
                       className={controls.pump_ph_down ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                     >
@@ -259,7 +259,7 @@ function DeviceConfig() {
           </div>
 
           <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            
+
             {/* TDS Settings */}
             <div>
               <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -268,20 +268,20 @@ function DeviceConfig() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Batas Min (PPM)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={settings.target_tds_min}
-                    onChange={(e) => setSettings({...settings, target_tds_min: e.target.value})}
+                    onChange={(e) => setSettings({ ...settings, target_tds_min: e.target.value })}
                     placeholder="misal: 800"
                   />
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Pompa Nutrisi hidup jika TDS &lt; Minimum</div>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Batas Maks (PPM)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={settings.target_tds_max}
-                    onChange={(e) => setSettings({...settings, target_tds_max: e.target.value})}
+                    onChange={(e) => setSettings({ ...settings, target_tds_max: e.target.value })}
                     placeholder="misal: 1200"
                   />
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Pompa otomatis mati jika TDS &gt; Maksimum</div>
@@ -299,20 +299,20 @@ function DeviceConfig() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>pH Min</label>
-                  <input 
+                  <input
                     type="number" step="0.1"
                     value={settings.target_ph_min}
-                    onChange={(e) => setSettings({...settings, target_ph_min: e.target.value})}
+                    onChange={(e) => setSettings({ ...settings, target_ph_min: e.target.value })}
                     placeholder="misal: 5.5"
                   />
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Pompa pH UP hidup jika pH &lt; Minimum</div>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>pH Maks</label>
-                  <input 
+                  <input
                     type="number" step="0.1"
                     value={settings.target_ph_max}
-                    onChange={(e) => setSettings({...settings, target_ph_max: e.target.value})}
+                    onChange={(e) => setSettings({ ...settings, target_ph_max: e.target.value })}
                     placeholder="misal: 6.5"
                   />
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Pompa pH DOWN hidup jika pH &gt; Maksimum</div>

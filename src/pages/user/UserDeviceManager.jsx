@@ -73,7 +73,7 @@ function UserDeviceManager() {
         },
         controls: {
           mode: 'auto',
-          pump_main: false,
+          pump_pestisida: false,
           pump_nutrisi_a: false,
           pump_nutrisi_b: false,
           pump_ph_up: false,
