@@ -510,9 +510,9 @@ const LandingPage = () => {
           <div>
             <h4 style={{ color: 'var(--text-main)', margin: '0 0 1rem', fontSize: '1.1rem' }}>Kontak</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Email: support@smarthydro.id</li>
-              <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Telepon: +62 812 3456 7890</li>
-              <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Alamat: Jl. Pertanian Hijau No. 99, Jakarta</li>
+              <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Email: ilhamrmdhnii02@gmail.com</li>
+              <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Telepon: +62 812 2048 9647</li>
+              <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Alamat: Cirebon, Jawa Barat, Indonesia</li>
             </ul>
           </div>
 
