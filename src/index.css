@@ -33,6 +33,13 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
 }
 
 /* Responsive Global Typography */
@@ -42,6 +49,7 @@ h3 { font-size: clamp(1rem, 4vw, 1.2rem) !important; }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -49,6 +57,7 @@ body {
   background-color: #F4E8DB; /* Solid Cream */
   color: var(--text-main);
   min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -80,6 +89,15 @@ body::before {
   50% { transform: scale(1.1); opacity: 1; }
   100% { transform: scale(0.95); opacity: 0.8; }
 }
+
+/* Animation Utilities */
+.animate-fade-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+
 
 /* Subtle 3D Cards */
 .glass-card {
@@ -217,24 +235,45 @@ button {
 
 /* Feature Grid Layout */
 .features-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  overflow-x: auto;
+  flex-wrap: nowrap;
   gap: 1rem;
   width: 100%;
   max-width: 1200px;
-  margin: 2rem auto 4rem;
-  padding: 0 5%;
+  margin: 2rem auto 2rem; /* reduced bottom margin because we have dots */
+  padding: 0 5% 3rem 5%; /* 3rem bottom padding to prevent hover shadow clipping */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.features-grid::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+.features-grid > * {
+  flex: 0 0 80%; /* Card takes 80% of screen to show next card */
+  scroll-snap-align: center;
+}
+
+.mobile-scroll-dots {
+  display: none !important;
 }
 
 @media (min-width: 640px) {
   .features-grid {
-    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow-x: visible;
+    padding: 0 5% 4rem 5%;
+  }
+  .features-grid > * {
+    flex: auto;
   }
 }
 
 @media (min-width: 1024px) {
   .features-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -516,8 +555,46 @@ button {
   color: var(--text-main);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .hide-on-mobile {
     display: none;
+  }
+  .feature-slider-section {
+    padding: 3rem 5% !important;
+  }
+  .feature-slider-grid {
+    gap: 1rem !important;
+    grid-template-columns: 1fr !important;
+  }
+  .phone-mockup-wrapper {
+    transform: scale(0.8);
+    transform-origin: center top;
+    margin-top: 0;
+    margin-bottom: -96px; /* Offset the 480px * 0.2 scaled height */
+  }
+  .feature-card-item {
+    padding: 1.1rem !important;
+  }
+  .feature-card-icon {
+    width: 40px !important;
+    height: 40px !important;
+    margin-bottom: 0.75rem !important;
+  }
+  .feature-card-title {
+    font-size: 1.05rem !important;
+  }
+  .feature-card-desc {
+    font-size: 0.85rem !important;
+  }
+  .mobile-scroll-dots {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .phone-mockup-wrapper {
+    transform: scale(0.65);
+    margin-top: 0;
+    margin-bottom: -168px; /* Offset the 480px * 0.35 scaled height */
   }
 }
