@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate, useParams, useLocation } from 'react-router-dom';
-import { LayoutDashboard, SlidersHorizontal, Settings as SettingsIcon, Users, User, Clock, LifeBuoy, LogOut, Power } from 'lucide-react';
+import { Home, SlidersHorizontal, Settings as SettingsIcon, Users, User, Clock, Ticket, LogOut, Power } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/auth/Login';
@@ -32,48 +32,53 @@ const ProtectedRoute = ({ children }) => {
 // Global Bottom Nav for Main Pages
 const GlobalBottomNav = () => {
   const { userRole } = useAuth();
+  const location = useLocation();
 
-  if (userRole === 'master_admin') {
-    return (
-      <nav className="bottom-nav">
-        <NavLink to="/" end className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-          <LayoutDashboard size={20} />
-          <span>Dashboard</span>
-        </NavLink>
-        <NavLink to="/users" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-          <Users size={20} />
-          <span>Kelola User</span>
-        </NavLink>
-        <NavLink to="/tickets" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-          <LifeBuoy size={20} />
-          <span>Pengaduan</span>
-        </NavLink>
-        <NavLink to="/profile" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-          <User size={20} />
-          <span>Profile</span>
-        </NavLink>
-      </nav>
-    );
-  }
+  const navItems = userRole === 'master_admin' ? [
+    { path: '/', icon: Home },
+    { path: '/users', icon: Users },
+    { path: '/tickets', icon: Ticket },
+    { path: '/profile', icon: User }
+  ] : [
+    { path: '/', icon: Home },
+    { path: '/devices', icon: SlidersHorizontal },
+    { path: '/tickets', icon: Ticket },
+    { path: '/profile', icon: User }
+  ];
+
+  let activeIndex = navItems.findIndex(item => {
+    if (item.path === '/') return location.pathname === '/';
+    // Match both /devices and /device/...
+    if (item.path === '/devices' && location.pathname.startsWith('/device/')) return true;
+    return location.pathname.startsWith(item.path);
+  });
+  
+  if (activeIndex === -1) activeIndex = 0;
 
   return (
-    <nav className="bottom-nav">
-      <NavLink to="/" end className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-        <LayoutDashboard size={20} />
-        <span>Dashboard</span>
-      </NavLink>
-      <NavLink to="/devices" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-        <SlidersHorizontal size={20} />
-        <span>Kelola Alat</span>
-      </NavLink>
-      <NavLink to="/tickets" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-        <LifeBuoy size={20} />
-        <span>Pengaduan</span>
-      </NavLink>
-      <NavLink to="/profile" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}>
-        <User size={20} />
-        <span>Profile</span>
-      </NavLink>
+    <nav className="smooth-bottom-nav" style={{ '--active-index': activeIndex }}>
+      <div className="nav-bg-clipper">
+        <div className="nav-bg-slider">
+          <svg width="100" height="70" viewBox="0 0 100 70" preserveAspectRatio="none">
+            <path d="M 0 0 C 25 0, 25 45, 50 45 C 75 45, 75 0, 100 0 L 100 70 L 0 70 Z" fill="white" />
+          </svg>
+        </div>
+      </div>
+      
+      <div className="nav-items">
+        {navItems.map((item, idx) => (
+           <NavLink 
+             key={item.path} 
+             to={item.path} 
+             end={item.path === '/'} 
+             className={({isActive}) => `nav-item ${isActive || activeIndex === idx ? 'active' : ''}`}
+           >
+             <div className="nav-icon-frame">
+               <item.icon size={24} strokeWidth={activeIndex === idx ? 2.5 : 2} />
+             </div>
+           </NavLink>
+        ))}
+      </div>
     </nav>
   );
 };
@@ -88,13 +93,13 @@ const AppLayout = () => {
   if (!currentUser) return <Navigate to="/login" />;
 
   const getPageTitleInfo = () => {
-    if (location.pathname === '/') return { title: 'Dashboard', icon: <LayoutDashboard size={24} /> };
+    if (location.pathname === '/') return { title: 'Dashboard', icon: <Home size={24} /> };
     if (location.pathname === '/users') return { title: 'Kelola User', icon: <Users size={24} /> };
     if (location.pathname === '/devices') return { title: 'Kelola Alat', icon: <SlidersHorizontal size={24} /> };
-    if (location.pathname === '/tickets') return { title: 'Pengaduan', icon: <LifeBuoy size={24} /> };
+    if (location.pathname === '/tickets') return { title: 'Pengaduan', icon: <Ticket size={24} /> };
     if (location.pathname === '/profile') return { title: 'Profil Saya', icon: <User size={24} /> };
     if (location.pathname.startsWith('/device/')) return { title: 'Konfigurasi', icon: <SettingsIcon size={24} /> };
-    return { title: 'Smart Hydro', icon: <LayoutDashboard size={24} /> };
+    return { title: 'Smart Hydro', icon: <Home size={24} /> };
   };
 
   const pageInfo = getPageTitleInfo();
