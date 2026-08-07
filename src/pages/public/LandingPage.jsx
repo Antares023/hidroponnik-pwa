@@ -142,8 +142,8 @@ const LandingPage = () => {
           {/* Contact Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>Kontak</h4>
-            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>support@smarthydro.id</p>
-            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>+62 812-3456-7890</p>
+            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>ilhamrmdhnii02@gmail.com</p>
+            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>+62 812-2048-9647</p>
             <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>Cirebon, Indonesia</p>
           </div>
         </div>
