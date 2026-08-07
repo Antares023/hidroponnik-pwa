@@ -12,13 +12,15 @@ import Profile from './pages/common/Profile';
 import DeviceConfig from './pages/device/DeviceConfig';
 import UserTickets from './pages/user/UserTickets';
 import AdminTickets from './pages/admin/AdminTickets';
+import LandingPage from './pages/public/LandingPage';
+import NotFound from './pages/public/NotFound';
 import './index.css';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const { currentUser, userRole, userStatus } = useAuth();
   
-  if (!currentUser) return <Navigate to="/login" />;
+  if (!currentUser) return <Navigate to="/landing" />;
   
   if (userRole !== 'master_admin') {
     if (!currentUser.emailVerified || userStatus === 'pending') {
@@ -149,7 +151,7 @@ const AppLayout = () => {
         </div>
       </header>
 
-      <main style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem) 1rem 3rem 1rem', maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <main style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem) 1rem 90px 1rem', maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         <Routes>
           <Route path="/" element={userRole === 'master_admin' ? <AdminDashboard view="dashboard" /> : <UserDashboard />} />
           <Route path="/users" element={userRole === 'master_admin' ? <AdminDashboard view="users" /> : <Navigate to="/" />} />
@@ -157,6 +159,7 @@ const AppLayout = () => {
           <Route path="/tickets" element={userRole === 'master_admin' ? <AdminTickets /> : <UserTickets />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/device/:deviceId/config" element={<DeviceConfig />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
@@ -171,6 +174,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />

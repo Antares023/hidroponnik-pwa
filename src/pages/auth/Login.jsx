@@ -145,9 +145,19 @@ function Login() {
               {isResetting ? 'Kembali ke Halaman Login' : 'Lupa Password?'}
             </button>
           </div>
-          <div>
-            <span style={{ color: 'var(--text-muted)' }}>Belum punya akun? </span>
-            <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Daftar di sini</Link>
+          {!isResetting && (
+            <div style={{ marginTop: '0.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              Belum punya akun?{' '}
+              <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold' }}>
+                Daftar
+              </Link>
+            </div>
+          )}
+
+          <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
+            <Link to="/landing" style={{ color: 'var(--text-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              &larr; Kembali ke Beranda
+            </Link>
           </div>
         </div>
       </div>

@@ -147,9 +147,17 @@ function Register() {
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Sudah punya akun? </span>
-          <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Login di sini</Link>
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+          Sudah punya akun?{' '}
+          <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold' }}>
+            Masuk
+          </Link>
+        </div>
+
+        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
+          <Link to="/landing" style={{ color: 'var(--text-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            &larr; Kembali ke Beranda
+          </Link>
         </div>
       </div>
     </div>
