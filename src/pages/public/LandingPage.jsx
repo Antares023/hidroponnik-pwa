@@ -9,7 +9,7 @@ const sliderData = [
     badge: 'Monitoring Real-time',
     badgeIcon: <Activity size={16} />,
     title: <>Pantau Kualitas Air <br/><span className="title-gradient">Kapan Saja & Di Mana Saja</span></>,
-    desc: 'Sistem cerdas kami membaca data sensor secara aktual (*real-time*). Anda tidak perlu lagi datang ke kebun hanya untuk mengecek kondisi tanaman. Semua data krusial tersaji dengan antarmuka yang memanjakan mata, langsung dari genggaman Anda.',
+    desc: 'Sistem cerdas kami membaca data sensor secara aktual (real-time). Anda tidak perlu lagi datang ke kebun hanya untuk mengecek kondisi tanaman. Semua data krusial tersaji dengan antarmuka yang memanjakan mata, langsung dari genggaman Anda.',
     image: '/monitoring-mockup.png', 
     points: [
       {
@@ -46,7 +46,7 @@ const sliderData = [
     badgeIcon: <Clock size={16} />,
     title: <>Penyemprotan Hama <br/><span className="title-gradient">Presisi, Anti Telat</span></>,
     desc: 'Bebaskan diri Anda dari rutinitas mengingat waktu menyemprot pestisida. Sistem penjadwalan pintar kami memastikan kebun Anda selalu terlindungi dari hama pada waktu yang telah Anda tentukan dengan akurasi tinggi.',
-    image: '/monitoring-mockup.png',
+    image: '/jadwal-pestisida.png',
     points: [
       {
         title: 'Sinkronisasi Waktu Global (NTP & RTC)',
@@ -64,7 +64,7 @@ const sliderData = [
     badgeIcon: <ShieldCheck size={16} />,
     title: <>Dukungan Teknis <br/><span className="title-gradient">Selalu Hadir Untuk Anda</span></>,
     desc: 'Kami memahami bahwa perangkat fisik mungkin sesekali butuh penanganan ekstra. Jangan panik, kami menyediakan sistem tiket pengaduan terintegrasi khusus untuk pengguna kami.',
-    image: '/monitoring-mockup.png',
+    image: '/pengaduan.png',
     points: [
       {
         title: 'Pelacakan Status Tiket Transparan',
