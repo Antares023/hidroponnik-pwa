@@ -3,7 +3,7 @@ import { ref, onValue, set } from 'firebase/database';
 import { database } from '../../firebase';
 import { useParams, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { ArrowLeft, Save, SlidersHorizontal, Settings as SettingsIcon, Power } from 'lucide-react';
+import { ArrowLeft, Save, SlidersHorizontal, Settings as SettingsIcon, Power, CalendarClock, Plus, Trash2, Clock } from 'lucide-react';
 
 function DeviceConfig() {
   const { deviceId } = useParams();
@@ -18,6 +18,13 @@ function DeviceConfig() {
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState('kontrol');
   const [controls, setControls] = useState(null);
+
+  // Schedules state
+  const [schedules, setSchedules] = useState({});
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [scheduleTime, setScheduleTime] = useState('06:00');
+  const [scheduleFrequency, setScheduleFrequency] = useState('everyday');
+  const [scheduleDuration, setScheduleDuration] = useState(15);
 
   useEffect(() => {
     if (!deviceId) return;
@@ -36,11 +43,81 @@ function DeviceConfig() {
       }
     });
 
+    const schedulesRef = ref(database, `devices/${deviceId}/schedules/pestisida`);
+    const unsubSchedules = onValue(schedulesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setSchedules(snapshot.val());
+      } else {
+        setSchedules({});
+      }
+    });
+
     return () => {
       unsubSettings();
       unsubControls();
+      unsubSchedules();
     };
   }, [deviceId]);
+
+  const handleSaveSchedule = async (e) => {
+    e.preventDefault();
+    if (!scheduleTime) return;
+
+    const scheduleId = 'sched_' + Date.now();
+    try {
+      await set(ref(database, `devices/${deviceId}/schedules/pestisida/${scheduleId}`), {
+        time: scheduleTime,
+        frequency: scheduleFrequency,
+        duration_seconds: Number(scheduleDuration),
+        is_active: true
+      });
+      setShowScheduleForm(false);
+      Swal.fire({
+        customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+        title: 'Tersimpan!',
+        text: 'Jadwal berhasil ditambahkan.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (err) {
+      Swal.fire({
+        customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
+        title: 'Gagal',
+        text: err.message,
+        icon: 'error'
+      });
+    }
+  };
+
+  const handleToggleSchedule = async (scheduleId, currentStatus) => {
+    try {
+      await set(ref(database, `devices/${deviceId}/schedules/pestisida/${scheduleId}/is_active`), !currentStatus);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteSchedule = async (scheduleId) => {
+    const confirm = await Swal.fire({
+      customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm', cancelButton: 'glass-swal-cancel' },
+      title: 'Hapus Jadwal?',
+      text: 'Jadwal penyemprotan ini akan dihapus permanen.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      reverseButtons: true
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await set(ref(database, `devices/${deviceId}/schedules/pestisida/${scheduleId}`), null);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   const handleSaveSettings = async (e) => {
     e.preventDefault();
@@ -126,20 +203,27 @@ function DeviceConfig() {
         </div>
       </div>
 
-      <div className="glass-card-concave" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.4rem', borderRadius: '16px' }}>
+      <div className="glass-card-concave" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.4rem', borderRadius: '16px' }}>
         <button
           onClick={() => setActiveTab('kontrol')}
           className={activeTab === 'kontrol' ? 'btn-3d' : ''}
-          style={{ flex: 1, padding: 'clamp(0.6rem, 2vw, 0.8rem)', fontSize: 'clamp(0.8rem, 3vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'kontrol' ? 'white' : 'var(--text-main)', background: activeTab === 'kontrol' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'kontrol' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)' }}
+          style={{ padding: 'clamp(0.5rem, 2vw, 0.8rem)', fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'kontrol' ? 'white' : 'var(--text-main)', background: activeTab === 'kontrol' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'kontrol' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem', justifyContent: 'center' }}
         >
-          🎛️ Kontrol Pompa
+          <span>🎛️</span><span>Kontrol</span>
         </button>
         <button
           onClick={() => setActiveTab('konfigurasi')}
           className={activeTab === 'konfigurasi' ? 'btn-3d' : ''}
-          style={{ flex: 1, padding: 'clamp(0.6rem, 2vw, 0.8rem)', fontSize: 'clamp(0.8rem, 3vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'konfigurasi' ? 'white' : 'var(--text-main)', background: activeTab === 'konfigurasi' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'konfigurasi' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)' }}
+          style={{ padding: 'clamp(0.5rem, 2vw, 0.8rem)', fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'konfigurasi' ? 'white' : 'var(--text-main)', background: activeTab === 'konfigurasi' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'konfigurasi' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem', justifyContent: 'center' }}
         >
-          ⚙️ Konfigurasi
+          <span>⚙️</span><span>Konfigurasi</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('jadwal')}
+          className={activeTab === 'jadwal' ? 'btn-3d' : ''}
+          style={{ padding: 'clamp(0.5rem, 2vw, 0.8rem)', fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)', fontWeight: 600, border: 'none', borderRadius: 'var(--radius-sm)', color: activeTab === 'jadwal' ? 'white' : 'var(--text-main)', background: activeTab === 'jadwal' ? 'var(--primary)' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'jadwal' ? 'none' : '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem', justifyContent: 'center' }}
+        >
+          <span>📅</span><span>Jadwal</span>
         </button>
       </div>
 
@@ -324,6 +408,92 @@ function DeviceConfig() {
               <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Konfigurasi'}
             </button>
           </form>
+        </div>
+      )}
+
+      {activeTab === 'jadwal' && (
+        <div className="glass-card-concave" style={{ padding: '1.2rem', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ flex: '1 1 min-content' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'var(--text-main)', lineHeight: 1.3 }}>
+                <CalendarClock size={20} color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} /> 
+                <span>Jadwal Pestisida</span>
+              </h3>
+              <p style={{ margin: 0, marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Otomatisasi penyemprotan</p>
+            </div>
+            <button 
+              onClick={() => setShowScheduleForm(!showScheduleForm)}
+              className={showScheduleForm ? 'btn-3d-secondary' : 'btn-3d'}
+              style={{ padding: '0.5rem 1rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+            >
+              {showScheduleForm ? 'Batal' : <><Plus size={16} /> Tambah</>}
+            </button>
+          </div>
+
+          {showScheduleForm && (
+            <form onSubmit={handleSaveSchedule} style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid var(--surface-border)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Waktu Semprot</label>
+                  <input type="time" required value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Durasi (detik)</label>
+                  <input type="number" min="1" max="3600" required value={scheduleDuration} onChange={(e) => setScheduleDuration(e.target.value)} style={{ width: '100%' }} />
+                </div>
+              </div>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Pengulangan</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setScheduleFrequency('everyday')}
+                    className={scheduleFrequency === 'everyday' ? 'btn-3d' : 'btn-3d-secondary'}
+                    style={{ padding: '0.6rem 1rem', borderRadius: '2rem', fontSize: '0.85rem', flex: 1 }}
+                  >
+                    Setiap Hari
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScheduleFrequency('today_only')}
+                    className={scheduleFrequency === 'today_only' ? 'btn-3d' : 'btn-3d-secondary'}
+                    style={{ padding: '0.6rem 1rem', borderRadius: '2rem', fontSize: '0.85rem', flex: 1 }}
+                  >
+                    Hari Ini Saja
+                  </button>
+                </div>
+              </div>
+              <button type="submit" className="btn-3d" style={{ width: '100%', padding: '0.8rem' }}>Simpan Jadwal</button>
+            </form>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            {Object.keys(schedules).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-muted)' }}>Belum ada jadwal yang dibuat.</div>
+            ) : (
+              Object.entries(schedules).map(([id, schedule]) => (
+                <div key={id} className="glass-panel" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 min-content' }}>
+                    <div style={{ background: schedule.is_active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0,0,0,0.05)', color: schedule.is_active ? '#10b981' : 'var(--text-muted)', padding: '0.6rem', borderRadius: '50%', flexShrink: 0 }}>
+                      <Clock size={20} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{schedule.time}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{schedule.frequency === 'everyday' ? 'Setiap Hari' : 'Hari Ini Saja'} • {schedule.duration_seconds} detik</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexShrink: 0 }}>
+                    <button onClick={() => handleToggleSchedule(id, schedule.is_active)} className={schedule.is_active ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                      {schedule.is_active ? 'ON' : 'OFF'}
+                    </button>
+                    <button onClick={() => handleDeleteSchedule(id)} style={{ background: 'transparent', border: 'none', color: 'var(--status-critical)', cursor: 'pointer', padding: '0.4rem' }}>
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>
