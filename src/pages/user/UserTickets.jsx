@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, push, onValue, set, remove } from 'firebase/database';
+import { ref, push, onValue, set, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
@@ -15,14 +15,14 @@ function UserTickets() {
 
   useEffect(() => {
     if (!currentUser) return;
-    const ticketsRef = ref(database, 'tickets');
-    const unsubTickets = onValue(ticketsRef, (snapshot) => {
+    // Query only tickets belonging to this user to satisfy Firebase Rules
+    const ticketsQuery = query(ref(database, 'tickets'), orderByChild('owner_uid'), equalTo(currentUser.uid));
+    
+    const unsubTickets = onValue(ticketsQuery, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        // Filter tickets that belong to the current user
         const userTicketsList = Object.entries(data)
           .map(([id, t]) => ({ id, ...t }))
-          .filter(t => t.user_uid === currentUser.uid)
           .sort((a, b) => b.timestamp - a.timestamp); // Sort by newest
         setTickets(userTicketsList);
       } else {
@@ -51,7 +51,8 @@ function UserTickets() {
       const ticketsRef = ref(database, 'tickets');
       const newTicketRef = push(ticketsRef);
       await set(newTicketRef, {
-        user_uid: currentUser.uid,
+        owner_uid: currentUser.uid, // Required by Firebase Rules
+        user_uid: currentUser.uid, // Retain for backward compatibility with Admin UI
         user_name: currentUser.displayName || currentUser.email,
         title: newTitle,
         description: newDescription,
