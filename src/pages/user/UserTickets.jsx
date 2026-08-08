@@ -16,7 +16,7 @@ function UserTickets() {
   useEffect(() => {
     if (!currentUser) return;
     // Query only tickets belonging to this user to satisfy Firebase Rules
-    const ticketsQuery = query(ref(database, 'tickets'), orderByChild('owner_uid'), equalTo(currentUser.uid));
+    const ticketsQuery = query(ref(database, 'tickets'), orderByChild('user_uid'), equalTo(currentUser.uid));
     
     const unsubTickets = onValue(ticketsQuery, (snapshot) => {
       if (snapshot.exists()) {
@@ -28,6 +28,14 @@ function UserTickets() {
       } else {
         setTickets([]);
       }
+    }, (error) => {
+      console.error("Firebase Read Error:", error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Gagal memuat tiket: ' + error.message,
+        icon: 'error',
+        customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' }
+      });
     });
 
     return () => unsubTickets();
@@ -51,8 +59,7 @@ function UserTickets() {
       const ticketsRef = ref(database, 'tickets');
       const newTicketRef = push(ticketsRef);
       await set(newTicketRef, {
-        owner_uid: currentUser.uid, // Required by Firebase Rules
-        user_uid: currentUser.uid, // Retain for backward compatibility with Admin UI
+        user_uid: currentUser.uid,
         user_name: currentUser.displayName || currentUser.email,
         title: newTitle,
         description: newDescription,
