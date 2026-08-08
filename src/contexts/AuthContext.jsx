@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { auth, database } from '../firebase';
 import { onAuthStateChanged, signOut, sendPasswordResetEmail } from 'firebase/auth';
-import { ref, get } from 'firebase/database';
+import { ref, get, update } from 'firebase/database';
 
 const AuthContext = createContext();
 
@@ -20,6 +20,13 @@ export function AuthProvider({ children }) {
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
           const userData = snapshot.val();
+          
+          // Sync email verification status to DB if they just verified
+          if (user.emailVerified && !userData.email_verified) {
+             await update(userRef, { email_verified: true });
+             userData.email_verified = true;
+          }
+
           setUserRole(userData.role);
           setUserStatus(userData.status || 'pending');
         } else {

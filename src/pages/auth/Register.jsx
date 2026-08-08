@@ -44,7 +44,9 @@ function Register() {
         phone: phone,
         institution: institution,
         role: 'user',
-        status: 'pending' // Admin needs to approve
+        status: 'pending', // Admin needs to approve
+        created_at: Date.now(),
+        email_verified: false
       });
       
       Swal.fire({
@@ -113,8 +115,12 @@ function Register() {
             <input 
               type="tel" 
               required 
+              maxLength="13"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                const onlyNums = e.target.value.replace(/\D/g, '');
+                setPhone(onlyNums);
+              }}
               placeholder="Contoh: 08123456789"
             />
           </div>

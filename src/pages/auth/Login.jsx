@@ -5,6 +5,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sprout, KeyRound } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { ref, get } from 'firebase/database';
+import { database } from '../../firebase';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -50,17 +52,47 @@ function Login() {
       }
     } else {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        Swal.fire({
-          ...swalConfig,
-          title: 'Login Berhasil',
-          text: 'Selamat datang kembali!',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false
-        }).then(() => {
-          navigate('/');
-        });
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        if (!user.emailVerified) {
+          Swal.fire({
+            ...swalConfig,
+            title: 'Verifikasi Dibutuhkan',
+            text: 'Email Anda belum diverifikasi. Lanjutkan ke halaman verifikasi.',
+            icon: 'warning',
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            navigate('/');
+          });
+        } else {
+          // Periksa status persetujuan admin dari Realtime DB
+          const snapshot = await get(ref(database, `users/${user.uid}`));
+          if (snapshot.exists() && snapshot.val().status === 'pending') {
+            Swal.fire({
+              ...swalConfig,
+              title: 'Menunggu Persetujuan',
+              text: 'Akun Anda sudah diverifikasi, namun masih menunggu persetujuan Admin.',
+              icon: 'info',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              navigate('/');
+            });
+          } else {
+            Swal.fire({
+              ...swalConfig,
+              title: 'Login Berhasil',
+              text: 'Selamat datang kembali!',
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              navigate('/');
+            });
+          }
+        }
       } catch (err) {
         Swal.fire({
           ...swalConfig,

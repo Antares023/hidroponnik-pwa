@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ref, onValue, set, remove, get, child } from 'firebase/database';
 import { database } from '../../firebase';
 import Swal from 'sweetalert2';
-import { Users, Server, CheckCircle, XCircle, Activity, Clock, ChevronDown, ChevronUp, Droplets, Thermometer, FlaskConical, LayoutDashboard, Edit2, CloudRain } from 'lucide-react';
+import { Users, Server, CheckCircle, XCircle, Activity, Clock, ChevronDown, ChevronUp, Droplets, Thermometer, FlaskConical, LayoutDashboard, Edit2, CloudRain, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function AdminDashboard({ view = 'dashboard' }) {
@@ -47,6 +47,22 @@ function AdminDashboard({ view = 'dashboard' }) {
       unsubDevices();
     };
   }, []);
+
+  // Auto-Cleanup Spam Accounts (> 24 hours unverified)
+  useEffect(() => {
+    if (Object.keys(users).length === 0) return;
+    
+    const now = Date.now();
+    const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in ms
+    
+    Object.entries(users).forEach(([uid, user]) => {
+      if (user.status === 'pending' && user.email_verified === false && user.created_at) {
+        if (now - user.created_at > ONE_DAY) {
+           remove(ref(database, `users/${uid}`)).catch(err => console.error("Auto-clean error:", err));
+        }
+      }
+    });
+  }, [users]);
 
   const getDevicesByUser = (uid) => {
     return Object.entries(devices).filter(([_, data]) => data.owner_uid === uid);
@@ -310,7 +326,7 @@ function AdminDashboard({ view = 'dashboard' }) {
   };
 
   // Derived State (Calculations)
-  const pendingUsersList = Object.entries(users).filter(([_, user]) => user.status === 'pending' && user.role !== 'master_admin');
+  const pendingUsersList = Object.entries(users).filter(([_, user]) => user.status === 'pending' && user.role !== 'master_admin' && user.email_verified === true);
   const activeUsersList = Object.entries(users).filter(([_, user]) => user.status === 'approved' && user.role !== 'master_admin');
   
   const totalPending = pendingUsersList.length;
@@ -392,6 +408,16 @@ function AdminDashboard({ view = 'dashboard' }) {
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{user.name}</h3>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, marginTop: '0.2rem' }}>{user.email}</p>
+                        {user.phone && (
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0.3rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Phone size={14} /> {user.phone}
+                          </p>
+                        )}
+                        {user.created_at && (
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0.3rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <Clock size={14} /> Terdaftar: {new Date(user.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        )}
                       </div>
                       <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--status-warning)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', height: 'fit-content' }}>
                         Menunggu Persetujuan
