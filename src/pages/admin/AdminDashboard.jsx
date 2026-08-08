@@ -369,31 +369,29 @@ function AdminDashboard({ view = 'dashboard' }) {
       {/* === KELOLA USER VIEW === */}
       {view === 'users' && (
         <>
-          {/* Tab Navigation dalam Kelola User */}
-          <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid rgba(22, 66, 60, 0.1)', marginBottom: '1.5rem', overflowX: 'auto' }}>
-            <button 
-              onClick={() => setActiveTab('overview')}
-              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'overview' ? 700 : 500, borderBottom: activeTab === 'overview' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
-            >
-              Active Users
-            </button>
-            <button 
-              onClick={() => setActiveTab('pending')}
-              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'pending' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'pending' ? 700 : 500, borderBottom: activeTab === 'pending' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', position: 'relative', whiteSpace: 'nowrap' }}
-            >
-              Pending
-              {totalPending > 0 && (
-                <span style={{ position: 'absolute', top: '0.5rem', right: '-1rem', background: 'var(--status-critical)', color: 'white', borderRadius: '50%', width: '1.2rem', height: '1.2rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {totalPending}
-                </span>
-              )}
-            </button>
-            <button 
-              onClick={() => setActiveTab('devices')}
-              style={{ background: 'none', border: 'none', padding: '0.8rem 0', color: activeTab === 'devices' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === 'devices' ? 700 : 500, borderBottom: activeTab === 'devices' ? '3px solid var(--primary)' : '3px solid transparent', borderRadius: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
-            >
-              Semua Perangkat
-            </button>
+          {/* Tab Navigation dalam Kelola User (3D Concave Style) */}
+          <div className="pill-tab-container">
+            <div className="pill-tab-scroll-area">
+              <button 
+                onClick={() => setActiveTab('overview')}
+                className={`pill-tab ${activeTab === 'overview' ? 'active' : ''}`}
+                style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+              >
+                Active Users
+              </button>
+              <button 
+                onClick={() => setActiveTab('pending')}
+                className={`pill-tab ${activeTab === 'pending' ? 'active' : ''}`}
+                style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem' }}
+              >
+                Pending
+                {totalPending > 0 && (
+                  <span style={{ background: 'var(--status-critical)', color: 'white', borderRadius: '1rem', padding: '0 0.4rem', height: '1.2rem', minWidth: '1.2rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {totalPending}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Tab Content: Pending */}
@@ -403,74 +401,36 @@ function AdminDashboard({ view = 'dashboard' }) {
                 <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem 0' }}>Tidak ada antrean pendaftaran.</div>
               ) : (
                 pendingUsersList.map(([uid, user]) => (
-                  <div key={uid} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--status-warning)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <div key={uid} className="glass-card" style={{ padding: '1.5rem', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    
+                    {/* Header Card (Badge & Text Stacked) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                      <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--status-warning)', padding: '0.3rem 0.8rem', borderRadius: '2rem', fontSize: '0.75rem', fontWeight: 700, width: 'fit-content' }}>
+                        Menunggu Persetujuan
+                      </div>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{user.name}</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, marginTop: '0.2rem' }}>{user.email}</p>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{user.name}</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0.2rem 0 0 0', wordBreak: 'break-all' }}>{user.email}</p>
                         {user.phone && (
-                          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0.3rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0.5rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <Phone size={14} /> {user.phone}
                           </p>
                         )}
                         {user.created_at && (
-                          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0.3rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0.5rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <Clock size={14} /> Terdaftar: {new Date(user.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </p>
                         )}
                       </div>
-                      <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--status-warning)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', height: 'fit-content' }}>
-                        Menunggu Persetujuan
-                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      <button onClick={() => handleApprove(uid, user.name)} className="btn-3d" style={{ flex: 1 }}>Setujui</button>
-                      <button onClick={() => handleReject(uid, user.name)} className="btn-3d btn-danger" style={{ flex: 1 }}>Tolak</button>
+
+                    {/* Actions */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <button onClick={() => handleApprove(uid, user.name)} className="btn-3d" style={{ width: '100%' }}>Setujui</button>
+                      <button onClick={() => handleReject(uid, user.name)} className="btn-3d btn-danger" style={{ width: '100%' }}>Tolak</button>
                     </div>
                   </div>
                 ))
-              )}
-            </div>
-          )}
-
-          {/* Tab Content: Semua Perangkat */}
-          {activeTab === 'devices' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {Object.keys(devices).length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem 0' }}>Belum ada perangkat yang terdaftar di sistem.</div>
-              ) : (
-                Object.entries(devices).map(([deviceId, devData]) => {
-                  const ownerName = users[devData.owner_uid]?.name || 'User Tidak Dikenal';
-                  const lastUpdated = devData.last_updated || 0;
-                  const isOnline = (currentTime - lastUpdated) <= 60 && lastUpdated > 0;
-                  
-                  return (
-                    <div key={deviceId} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ background: 'rgba(22, 66, 60, 0.05)', padding: '0.8rem', borderRadius: '50%' }}>
-                          <Server size={24} color="var(--primary)" />
-                        </div>
-                        <div>
-                          <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{devData.name || 'Alat Tanpa Nama'}</h3>
-                          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>ID: {deviceId} | Pemilik: {ownerName}</p>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        {isOnline ? (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--primary)', background: 'rgba(22, 66, 60, 0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Online</span>
-                        ) : (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--status-critical)', background: 'rgba(239, 68, 68, 0.1)', padding: '0.3rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>Offline</span>
-                        )}
-                        <button 
-                          onClick={() => handleDeleteDeviceAdmin(deviceId, devData.name)}
-                          style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--status-critical)', border: '1px solid var(--status-critical)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
-                        >
-                          Hapus Paksa
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
               )}
             </div>
           )}
