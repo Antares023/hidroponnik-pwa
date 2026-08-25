@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [userStatus, setUserStatus] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,13 +30,16 @@ export function AuthProvider({ children }) {
 
           setUserRole(userData.role);
           setUserStatus(userData.status || 'pending');
+          setUserData(userData);
         } else {
           setUserRole('user'); // Default
           setUserStatus('pending');
+          setUserData(null);
         }
       } else {
         setUserRole(null);
         setUserStatus(null);
+        setUserData(null);
       }
       setLoading(false);
     });
@@ -55,6 +59,7 @@ export function AuthProvider({ children }) {
     currentUser,
     userRole,
     userStatus,
+    userData,
     logout,
     resetPassword
   };

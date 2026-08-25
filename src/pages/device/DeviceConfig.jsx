@@ -3,7 +3,7 @@ import { ref, onValue, set } from 'firebase/database';
 import { database } from '../../firebase';
 import { useParams, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { ArrowLeft, Save, SlidersHorizontal, Settings as SettingsIcon, Power, CalendarClock, Plus, Trash2, Clock } from 'lucide-react';
+import { ArrowLeft, Save, SlidersHorizontal, Settings as SettingsIcon, Power, CalendarClock, Plus, Trash2, Clock, Edit2 } from 'lucide-react';
 
 function DeviceConfig() {
   const { deviceId } = useParams();
@@ -11,7 +11,9 @@ function DeviceConfig() {
     target_tds_min: 800,
     target_tds_max: 1200,
     target_ph_min: 5.5,
-    target_ph_max: 6.5
+    target_ph_max: 6.5,
+    dosing_duration: 3,
+    mixing_duration: 120
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,6 +27,7 @@ function DeviceConfig() {
   const [scheduleTime, setScheduleTime] = useState('06:00');
   const [scheduleFrequency, setScheduleFrequency] = useState('everyday');
   const [scheduleDuration, setScheduleDuration] = useState(15);
+  const [editingScheduleId, setEditingScheduleId] = useState(null);
 
   useEffect(() => {
     if (!deviceId) return;
@@ -63,7 +66,7 @@ function DeviceConfig() {
     e.preventDefault();
     if (!scheduleTime) return;
 
-    const scheduleId = 'sched_' + Date.now();
+    const scheduleId = editingScheduleId ? editingScheduleId : ('sched_' + Date.now());
     try {
       await set(ref(database, `devices/${deviceId}/schedules/pestisida/${scheduleId}`), {
         time: scheduleTime,
@@ -72,10 +75,11 @@ function DeviceConfig() {
         is_active: true
       });
       setShowScheduleForm(false);
+      setEditingScheduleId(null);
       Swal.fire({
         customClass: { popup: 'glass-swal', title: 'glass-swal-title', confirmButton: 'glass-swal-confirm' },
         title: 'Tersimpan!',
-        text: 'Jadwal berhasil ditambahkan.',
+        text: 'Jadwal berhasil disimpan.',
         icon: 'success',
         timer: 1500,
         showConfirmButton: false
@@ -87,6 +91,23 @@ function DeviceConfig() {
         text: err.message,
         icon: 'error'
       });
+    }
+  };
+
+  const handleEditSchedule = (id, schedule) => {
+    setEditingScheduleId(id);
+    setScheduleTime(schedule.time);
+    setScheduleFrequency(schedule.frequency);
+    setScheduleDuration(schedule.duration_seconds);
+    setShowScheduleForm(true);
+  };
+
+  const handleCancelForm = () => {
+    setShowScheduleForm(!showScheduleForm);
+    if (showScheduleForm) {
+      setEditingScheduleId(null);
+      setScheduleTime('06:00');
+      setScheduleDuration(15);
     }
   };
 
@@ -151,7 +172,9 @@ function DeviceConfig() {
         target_tds_min: Number(settings.target_tds_min),
         target_tds_max: Number(settings.target_tds_max),
         target_ph_min: Number(settings.target_ph_min),
-        target_ph_max: Number(settings.target_ph_max)
+        target_ph_max: Number(settings.target_ph_max),
+        dosing_duration: Number(settings.dosing_duration),
+        mixing_duration: Number(settings.mixing_duration)
       });
       Swal.fire({
         ...swalConfig,
@@ -187,6 +210,37 @@ function DeviceConfig() {
       await set(ref(database, `devices/${deviceId}/controls/${pumpName}`), newValue);
     } catch (err) {
       alert("Gagal merubah status pompa");
+    }
+  };
+
+  const handleResetWifi = async () => {
+    const swalConfig = {
+      customClass: { popup: 'glass-swal', title: 'glass-swal-title', htmlContainer: 'glass-swal-content', confirmButton: 'glass-swal-confirm', cancelButton: 'glass-swal-cancel' }
+    };
+    const confirm = await Swal.fire({
+      ...swalConfig,
+      title: 'Reset Jaringan WiFi?',
+      text: 'Alat akan terputus dari internet dan memancarkan WiFi "SmartHydro-Config". Anda harus menyambungkannya kembali ke WiFi secara manual.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Reset',
+      cancelButtonText: 'Batal',
+      reverseButtons: true
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await set(ref(database, `devices/${deviceId}/controls/reset_wifi`), true);
+        Swal.fire({
+          ...swalConfig,
+          title: 'Perintah Dikirim!',
+          html: '<div style="text-align: left; font-size: 0.9rem;">1. Tunggu 10 detik agar alat restart.<br/><br/>2. Buka pengaturan WiFi HP Anda.<br/><br/>3. Hubungkan ke jaringan <b>SmartHydro-Config</b>.<br/><br/>4. Ikuti instruksi di layar atau buka <b>192.168.4.1</b> di browser.</div>',
+          icon: 'info',
+          confirmButtonText: 'Mengerti'
+        });
+      } catch (err) {
+        Swal.fire({ ...swalConfig, title: 'Gagal', text: err.message, icon: 'error' });
+      }
     }
   };
 
@@ -279,27 +333,14 @@ function DeviceConfig() {
 
                 <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontWeight: 600 }}>Pompa Nutrisi A</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pekatan A</div>
+                    <div style={{ fontWeight: 600 }}>Mix Nutrisi (A+B)</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mencampur Pekatan A & B</div>
                   </div>
                   <button
-                    onClick={() => togglePump('pump_nutrisi_a')}
-                    className={controls.pump_nutrisi_a ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
+                    onClick={() => togglePump('pump_nutrisi')}
+                    className={controls.pump_nutrisi ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
                   >
-                    <Power size={16} /> {controls.pump_nutrisi_a ? 'ON' : 'OFF'}
-                  </button>
-                </div>
-
-                <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>Pompa Nutrisi B</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pekatan B</div>
-                  </div>
-                  <button
-                    onClick={() => togglePump('pump_nutrisi_b')}
-                    className={controls.pump_nutrisi_b ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'}
-                  >
-                    <Power size={16} /> {controls.pump_nutrisi_b ? 'ON' : 'OFF'}
+                    <Power size={16} /> {controls.pump_nutrisi ? 'ON' : 'OFF'}
                   </button>
                 </div>
 
@@ -404,10 +445,61 @@ function DeviceConfig() {
               </div>
             </div>
 
+            <hr style={{ border: 0, borderTop: '1px solid var(--surface-border)', margin: '1rem 0' }} />
+
+            {/* Siklus Pompa Settings */}
+            <div>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Siklus Pompa (Otomatis)
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Lama Semprot (Detik)</label>
+                  <input
+                    type="number" min="1" max="60"
+                    value={settings.dosing_duration || 3}
+                    onChange={(e) => setSettings({ ...settings, dosing_duration: e.target.value })}
+                    placeholder="misal: 3"
+                  />
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Durasi pompa nutrisi/pH menyala (Dosing)</div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Lama Aduk (Detik)</label>
+                  <input
+                    type="number" min="10" max="600"
+                    value={settings.mixing_duration || 120}
+                    onChange={(e) => setSettings({ ...settings, mixing_duration: e.target.value })}
+                    placeholder="misal: 120"
+                  />
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Jeda waktu tunggu setelah dosing (Mixing)</div>
+                </div>
+              </div>
+            </div>
+
             <button type="submit" disabled={loading} className="btn-3d" style={{ padding: '1rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
               <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Konfigurasi'}
             </button>
           </form>
+
+          <hr style={{ border: 0, borderTop: '1px solid var(--surface-border)', margin: '1.5rem 0' }} />
+
+          {/* Jaringan WiFi Settings */}
+          <div>
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Pengaturan Jaringan
+            </h3>
+            <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Ubah atau putuskan koneksi internet alat untuk menyambungkannya ke WiFi lain.
+            </p>
+            <button 
+              onClick={handleResetWifi} 
+              type="button" 
+              className="btn-3d btn-danger" 
+              style={{ width: '100%', padding: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}
+            >
+              <Power size={16} /> Reset WiFi Alat
+            </button>
+          </div>
         </div>
       )}
 
@@ -422,7 +514,7 @@ function DeviceConfig() {
               <p style={{ margin: 0, marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Otomatisasi penyemprotan</p>
             </div>
             <button 
-              onClick={() => setShowScheduleForm(!showScheduleForm)}
+              onClick={handleCancelForm}
               className={showScheduleForm ? 'btn-3d-secondary' : 'btn-3d'}
               style={{ padding: '0.5rem 1rem', borderRadius: '2rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
             >
@@ -485,6 +577,9 @@ function DeviceConfig() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexShrink: 0 }}>
                     <button onClick={() => handleToggleSchedule(id, schedule.is_active)} className={schedule.is_active ? 'btn-3d-toggle-on' : 'btn-3d-toggle-off'} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600 }}>
                       {schedule.is_active ? 'ON' : 'OFF'}
+                    </button>
+                    <button onClick={() => handleEditSchedule(id, schedule)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: '0.4rem' }}>
+                      <Edit2 size={18} />
                     </button>
                     <button onClick={() => handleDeleteSchedule(id)} style={{ background: 'transparent', border: 'none', color: 'var(--status-critical)', cursor: 'pointer', padding: '0.4rem' }}>
                       <Trash2 size={18} />

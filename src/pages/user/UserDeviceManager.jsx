@@ -69,15 +69,17 @@ function UserDeviceManager() {
           target_tds_min: 800,
           target_tds_max: 1200,
           target_ph_min: 5.5,
-          target_ph_max: 6.5
+          target_ph_max: 6.5,
+          dosing_duration: 3,
+          mixing_duration: 120
         },
         controls: {
           mode: 'auto',
           pump_pestisida: false,
-          pump_nutrisi_a: false,
-          pump_nutrisi_b: false,
+          pump_nutrisi: false,
           pump_ph_up: false,
-          pump_ph_down: false
+          pump_ph_down: false,
+          reset_wifi: false
         }
       });
       setShowAddForm(false);

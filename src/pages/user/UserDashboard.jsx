@@ -6,7 +6,7 @@ import { Thermometer, Droplets, FlaskConical, Beaker, CloudRain, Server, AlertTr
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
 
 const PdfIcon = ({ size = 18, color = "currentColor" }) => (
@@ -34,7 +34,7 @@ const IndicatorCard = ({ title, value, unit, icon: Icon, statusClass }) => (
 );
 
 function UserDashboard() {
-  const { currentUser } = useAuth();
+  const { currentUser, userData } = useAuth();
   const [devices, setDevices] = useState({});
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [data, setData] = useState(null);
@@ -171,11 +171,11 @@ function UserDashboard() {
 
 
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!historyData || historyData.length === 0) {
       Swal.fire({
         title: 'Data Kosong',
-        text: 'Belum ada data history untuk diunduh. Tunggu beberapa saat agar alat mengirimkan data pertama.',
+        text: 'Belum ada data history untuk diunduh.',
         icon: 'warning',
         confirmButtonColor: '#16423c'
       });
@@ -185,16 +185,63 @@ function UserDashboard() {
     const doc = new jsPDF();
     const deviceName = devices[selectedDeviceId]?.name || selectedDeviceId;
     
-    // Header
-    doc.setFontSize(18);
-    doc.text('Laporan Sensor Hidroponik', 14, 20);
-    doc.setFontSize(11);
-    doc.text(`ID Device: ${selectedDeviceId}`, 14, 28);
-    doc.text(`Nama Device: ${deviceName}`, 14, 34);
-    doc.text(`Waktu Unduh: ${new Date().toLocaleString('id-ID')}`, 14, 40);
+    // --- MODERN HEADER START ---
+    // Top colored band
+    doc.setFillColor(22, 101, 52); // Dark Green
+    doc.rect(0, 0, 210, 36, 'F');
+    
+    try {
+      const imgObj = new Image();
+      imgObj.src = '/pwa-192x192.png';
+      await new Promise((resolve, reject) => { 
+        imgObj.onload = resolve; 
+        imgObj.onerror = reject;
+      });
+      // Draw logo over green band
+      doc.addImage(imgObj, 'PNG', 14, 7, 22, 22);
+    } catch(e) {
+      // Abaikan jika logo gagal dimuat
+    }
+
+    // Title in white
+    doc.setFontSize(24);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.text('SMART HYDRO', 42, 20);
+    
+    // Subtitle in light green
+    doc.setFontSize(10);
+    doc.setTextColor(190, 230, 190);
+    doc.setFont("helvetica", "normal");
+    doc.text('Laporan Riwayat Sensor & Kualitas Air', 42, 27);
+    
+    // Meta Data Box (Grey Background)
+    doc.setFillColor(248, 250, 252);
+    doc.rect(14, 45, 182, 30, 'F');
+    
+    // Meta Data Content
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.setFont("helvetica", "bold");
+    doc.text('INFORMASI PERANGKAT', 20, 54);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105);
+    doc.text(`ID Perangkat : ${selectedDeviceId}`, 20, 62);
+    doc.text(`Nama Alat    : ${deviceName}`, 20, 68);
+    
+    doc.text(`Waktu Cetak : ${new Date().toLocaleString('id-ID')}`, 115, 62);
+    
+    // Gunakan nama dari database user (userData.name)
+    let printedBy = userData?.name || currentUser?.displayName;
+    if (!printedBy || printedBy.trim() === '') {
+        printedBy = 'Administrator';
+    }
+    doc.text(`Dicetak Oleh : ${printedBy}`, 115, 68);
+    // --- HEADER END ---
 
     // Table Data
-    const tableColumn = ["Waktu", "pH", "TDS (ppm)", "Suhu Air (C)"];
+    const tableColumn = ["Waktu Pengukuran", "pH Air", "TDS (ppm)", "Suhu Air (°C)"];
     const tableRows = [];
 
     historyData.forEach(item => {
@@ -207,14 +254,25 @@ function UserDashboard() {
       tableRows.push(rowData);
     });
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 45,
+      startY: 85,
       theme: 'grid',
-      styles: { fontSize: 9, cellPadding: 3 },
-      headStyles: { fillColor: [22, 101, 52] } // Dark green
+      styles: { fontSize: 9, cellPadding: 5, halign: 'center', textColor: [71, 85, 105], lineColor: [226, 232, 240] },
+      headStyles: { fillColor: [22, 101, 52], textColor: [255, 255, 255], fontStyle: 'bold' }, // Dark green
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { top: 10, left: 14, right: 14 }
     });
+
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Laporan dihasilkan otomatis oleh Sistem Smart Hydroponik - Halaman ${i} dari ${pageCount}`, 14, doc.internal.pageSize.height - 10);
+    }
 
     doc.save(`Laporan_Hidroponik_${selectedDeviceId}.pdf`);
   };
@@ -305,39 +363,90 @@ function UserDashboard() {
             </div>
           </div>
 
-          {/* History Chart */}
-          <div className="glass-card-concave" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
-            <h3 className="title-gradient" style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <LayoutDashboard size={18} /> Grafik Riwayat Sensor
+          {/* History Chart Header */}
+          <div style={{ marginTop: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <LayoutDashboard size={20} color="var(--primary)" />
+            <h3 className="title-gradient" style={{ fontSize: '1.2rem', margin: 0 }}>
+               Grafik Riwayat Sensor
             </h3>
-            
-            {historyData && historyData.length > 0 ? (
-              <div style={{ width: '100%', height: 260 }}>
-                <ResponsiveContainer>
-                  <LineChart data={historyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(22, 66, 60, 0.1)" />
-                    <XAxis dataKey="time" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
-                    <YAxis yAxisId="left" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '12px', border: '1px solid rgba(255,255,255,0.4)', boxShadow: 'var(--shadow-outer)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '0.8rem', paddingTop: '10px' }} />
-                    <Line yAxisId="left" type="monotone" dataKey="tds" stroke="var(--primary)" name="TDS (ppm)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="ph" stroke="var(--status-critical)" name="pH Air" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="suhu_air" stroke="#f59e0b" name="Suhu Air (°C)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="suhu_ruangan" stroke="#10b981" name="Suhu Udara (°C)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="kelembapan" stroke="#3b82f6" name="Kelembapan (%)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div style={{ width: '100%', height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                <em>Menunggu pengiriman data history pertama dari alat...</em>
-              </div>
-            )}
           </div>
+            
+          {historyData && historyData.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                
+              {/* TDS Chart */}
+              <div className="glass-card-concave" style={{ padding: '1.25rem', width: '100%', display: 'flex', flexDirection: 'column' }}>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Tingkat Nutrisi (TDS)</h4>
+                <div style={{ width: '100%', height: 220, marginTop: 'auto' }}>
+                  <ResponsiveContainer>
+                    <LineChart data={historyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(22, 66, 60, 0.1)" />
+                      <XAxis dataKey="time" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-outer)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }} />
+                      <Line type="monotone" dataKey="tds" stroke="var(--primary)" name="TDS (ppm)" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
 
+              {/* pH Chart */}
+              <div className="glass-card-concave" style={{ padding: '1.25rem', width: '100%', display: 'flex', flexDirection: 'column' }}>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Kadar Keasaman (pH)</h4>
+                <div style={{ width: '100%', height: 220, marginTop: 'auto' }}>
+                  <ResponsiveContainer>
+                    <LineChart data={historyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(22, 66, 60, 0.1)" />
+                      <XAxis dataKey="time" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-outer)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }} />
+                      <Line type="monotone" dataKey="ph" stroke="var(--status-critical)" name="pH Air" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Suhu Air (DS18B20) Chart */}
+              <div className="glass-card-concave" style={{ padding: '1.25rem', width: '100%', display: 'flex', flexDirection: 'column' }}>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Suhu Air Tandon (°C)</h4>
+                <div style={{ width: '100%', height: 220, marginTop: 'auto' }}>
+                  <ResponsiveContainer>
+                    <LineChart data={historyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(22, 66, 60, 0.1)" />
+                      <XAxis dataKey="time" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-outer)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }} />
+                      <Line type="monotone" dataKey="suhu_air" stroke="#f59e0b" name="Suhu Air" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Lingkungan Udara (DHT22) Chart */}
+              <div className="glass-card-concave" style={{ padding: '1.25rem', width: '100%', display: 'flex', flexDirection: 'column' }}>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Lingkungan Udara</h4>
+                <div style={{ width: '100%', height: 220, marginTop: 'auto' }}>
+                  <ResponsiveContainer>
+                    <LineChart data={historyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(22, 66, 60, 0.1)" />
+                      <XAxis dataKey="time" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <YAxis yAxisId="left" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-outer)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }} />
+                      <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                      <Line yAxisId="left" type="monotone" dataKey="suhu_ruangan" stroke="#10b981" name="Suhu Udara (°C)" strokeWidth={2} dot={{ r: 1 }} />
+                      <Line yAxisId="right" type="monotone" dataKey="kelembapan" stroke="#3b82f6" name="Kelembapan (%)" strokeWidth={2} dot={{ r: 1 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+            </div>
+          ) : (
+            <div className="glass-card-concave" style={{ width: '100%', height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                <em>Menunggu pengiriman data history pertama dari alat...</em>
+            </div>
+          )}
 
         </>
       )}
