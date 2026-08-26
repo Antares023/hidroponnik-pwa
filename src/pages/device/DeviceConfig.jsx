@@ -12,8 +12,10 @@ function DeviceConfig() {
     target_tds_max: 1200,
     target_ph_min: 5.5,
     target_ph_max: 6.5,
-    dosing_duration: 3,
-    mixing_duration: 120
+    nutrisi_dosing_duration: 3,
+    nutrisi_mixing_duration: 120,
+    ph_dosing_duration: 3,
+    ph_mixing_duration: 120
   });
 
   const [loading, setLoading] = useState(false);
@@ -173,8 +175,10 @@ function DeviceConfig() {
         target_tds_max: Number(settings.target_tds_max),
         target_ph_min: Number(settings.target_ph_min),
         target_ph_max: Number(settings.target_ph_max),
-        dosing_duration: Number(settings.dosing_duration),
-        mixing_duration: Number(settings.mixing_duration)
+        nutrisi_dosing_duration: Number(settings.nutrisi_dosing_duration),
+        nutrisi_mixing_duration: Number(settings.nutrisi_mixing_duration),
+        ph_dosing_duration: Number(settings.ph_dosing_duration),
+        ph_mixing_duration: Number(settings.ph_mixing_duration)
       });
       Swal.fire({
         ...swalConfig,
@@ -378,12 +382,12 @@ function DeviceConfig() {
       )}
 
       {activeTab === 'konfigurasi' && (
-        <div className="glass-card">
-          <div style={{ background: 'rgba(59, 130, 246, 0.1)', borderLeft: '4px solid #3b82f6', padding: '1rem', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            <strong>Info:</strong> Ambang batas ini digunakan untuk mengontrol pompa secara otomatis (Mode Auto).
-          </div>
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="glass-card">
+            <div style={{ background: 'rgba(59, 130, 246, 0.1)', borderLeft: '4px solid #3b82f6', padding: '1rem', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              <strong>Info:</strong> Ambang batas ini digunakan untuk mengontrol pompa secara otomatis (Mode Auto).
+            </div>
 
             {/* TDS Settings */}
             <div>
@@ -413,10 +417,10 @@ function DeviceConfig() {
                 </div>
               </div>
             </div>
+          </div>
 
-            <hr style={{ border: 0, borderTop: '1px solid var(--surface-border)', margin: '0.5rem 0' }} />
-
-            {/* pH Settings */}
+          {/* pH Settings */}
+          <div className="glass-card">
             <div>
               <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 Pengaturan Keasaman (pH)
@@ -444,47 +448,77 @@ function DeviceConfig() {
                 </div>
               </div>
             </div>
+          </div>
 
-            <hr style={{ border: 0, borderTop: '1px solid var(--surface-border)', margin: '1rem 0' }} />
-
-            {/* Siklus Pompa Settings */}
+          {/* Siklus Pompa Nutrisi Settings */}
+          <div className="glass-card">
             <div>
               <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                Siklus Pompa (Otomatis)
+                Siklus Pompa Nutrisi
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Lama Semprot (Detik)</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Semprot Nutrisi (Detik)</label>
                   <input
                     type="number" min="1" max="60"
-                    value={settings.dosing_duration || 3}
-                    onChange={(e) => setSettings({ ...settings, dosing_duration: e.target.value })}
+                    value={settings.nutrisi_dosing_duration || 3}
+                    onChange={(e) => setSettings({ ...settings, nutrisi_dosing_duration: e.target.value })}
                     placeholder="misal: 3"
                   />
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Durasi pompa nutrisi/pH menyala (Dosing)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Durasi semprot (Dosing)</div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Lama Aduk (Detik)</label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Aduk Nutrisi (Detik)</label>
                   <input
                     type="number" min="10" max="600"
-                    value={settings.mixing_duration || 120}
-                    onChange={(e) => setSettings({ ...settings, mixing_duration: e.target.value })}
+                    value={settings.nutrisi_mixing_duration || 120}
+                    onChange={(e) => setSettings({ ...settings, nutrisi_mixing_duration: e.target.value })}
                     placeholder="misal: 120"
                   />
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Jeda waktu tunggu setelah dosing (Mixing)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Jeda aduk (Mixing)</div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <button type="submit" disabled={loading} className="btn-3d" style={{ padding: '1rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-              <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Konfigurasi'}
-            </button>
-          </form>
+          {/* Siklus Pompa pH Settings */}
+          <div className="glass-card">
+            <div>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Siklus Pompa pH
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Semprot pH (Detik)</label>
+                  <input
+                    type="number" min="1" max="60"
+                    value={settings.ph_dosing_duration || 3}
+                    onChange={(e) => setSettings({ ...settings, ph_dosing_duration: e.target.value })}
+                    placeholder="misal: 3"
+                  />
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Durasi semprot (Dosing)</div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Aduk pH (Detik)</label>
+                  <input
+                    type="number" min="10" max="600"
+                    value={settings.ph_mixing_duration || 120}
+                    onChange={(e) => setSettings({ ...settings, ph_mixing_duration: e.target.value })}
+                    placeholder="misal: 120"
+                  />
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Jeda aduk (Mixing)</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <hr style={{ border: 0, borderTop: '1px solid var(--surface-border)', margin: '1.5rem 0' }} />
+          <button type="submit" disabled={loading} className="btn-3d" style={{ padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+            <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Konfigurasi'}
+          </button>
+        </form>
 
-          {/* Jaringan WiFi Settings */}
-          <div>
+        {/* Jaringan WiFi Settings */}
+        <div className="glass-card">
             <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               Pengaturan Jaringan
             </h3>
