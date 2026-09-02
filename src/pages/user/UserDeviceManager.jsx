@@ -75,33 +75,24 @@ function UserDeviceManager() {
       const updates = {};
       updates[`owner_uid`] = currentUser.uid;
       updates[`name`] = newName;
-      
-      // Hanya set nilai default jika belum ada (tidak menimpa kalau sudah ada)
-      const settingsSnap = await get(child(ref(database), `devices/${trimmedMac}/settings`));
-      if (!settingsSnap.exists()) {
-        updates[`settings`] = {
-          target_tds_min: 800,
-          target_tds_max: 1200,
-          target_ph_min: 5.5,
-          target_ph_max: 6.5,
-          nutrisi_dosing_duration: 3,
-          nutrisi_mixing_duration: 120,
-          ph_dosing_duration: 3,
-          ph_mixing_duration: 120
-        };
-      }
-      
-      const controlsSnap = await get(child(ref(database), `devices/${trimmedMac}/controls`));
-      if (!controlsSnap.exists()) {
-        updates[`controls`] = {
-          mode: 'auto',
-          pump_pestisida: false,
-          pump_nutrisi: false,
-          pump_ph_up: false,
-          pump_ph_down: false,
-          reset_wifi: false
-        };
-      }
+      updates[`settings`] = {
+        target_tds_min: 800,
+        target_tds_max: 1200,
+        target_ph_min: 5.5,
+        target_ph_max: 6.5,
+        nutrisi_dosing_duration: 3,
+        nutrisi_mixing_duration: 120,
+        ph_dosing_duration: 3,
+        ph_mixing_duration: 120
+      };
+      updates[`controls`] = {
+        mode: 'auto',
+        pump_pestisida: false,
+        pump_nutrisi: false,
+        pump_ph_up: false,
+        pump_ph_down: false,
+        reset_wifi: false
+      };
 
       // Melakukan update pada level node spesifik agar tidak terkena Permission Denied dari Firebase
       await update(ref(database, `devices/${trimmedMac}`), updates);
