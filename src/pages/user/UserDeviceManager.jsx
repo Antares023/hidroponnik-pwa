@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, set, query, orderByChild, equalTo, get, child, remove } from 'firebase/database';
+import { ref, onValue, set, update, query, orderByChild, equalTo, get, child, remove } from 'firebase/database';
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
@@ -37,7 +37,8 @@ function UserDeviceManager() {
 
   const handleAddDevice = async (e) => {
     e.preventDefault();
-    if (!newMac || !newName) return;
+    const trimmedMac = newMac.trim();
+    if (!trimmedMac || !newName) return;
 
     const swalConfig = {
       customClass: {
@@ -49,39 +50,52 @@ function UserDeviceManager() {
     };
 
     try {
-      // 1. Cek apakah ID sudah terpakai dengan hanya membaca owner_uid-nya (agar tidak kena Permission Denied)
-      const snapshot = await get(child(ref(database), `devices/${newMac}/owner_uid`));
-      if (snapshot.exists()) {
+      // 1. Cek apakah ID sudah terpakai oleh user lain
+      const snapshot = await get(child(ref(database), `devices/${trimmedMac}/owner_uid`));
+      if (snapshot.exists() && snapshot.val() !== currentUser.uid) {
         Swal.fire({
           ...swalConfig,
           title: 'Gagal',
-          text: 'Kode perangkat ini sudah terdaftar di sistem. Harap gunakan kode unik lain.',
+          text: 'Kode perangkat ini sudah terdaftar di sistem oleh pengguna lain. Harap gunakan kode unik lain.',
           icon: 'error'
         });
         return;
       }
 
-      // 2. Jika belum, tambahkan
-      await set(ref(database, `devices/${newMac}`), {
-        owner_uid: currentUser.uid,
-        name: newName,
-        settings: {
+      // 2. Jika belum, tambahkan/update tanpa menghapus data sensor yang sudah ada
+      const updates = {};
+      updates[`devices/${trimmedMac}/owner_uid`] = currentUser.uid;
+      updates[`devices/${trimmedMac}/name`] = newName;
+      
+      // Hanya set nilai default jika belum ada (tidak menimpa kalau sudah ada)
+      const settingsSnap = await get(child(ref(database), `devices/${trimmedMac}/settings`));
+      if (!settingsSnap.exists()) {
+        updates[`devices/${trimmedMac}/settings`] = {
           target_tds_min: 800,
           target_tds_max: 1200,
           target_ph_min: 5.5,
           target_ph_max: 6.5,
-          dosing_duration: 3,
-          mixing_duration: 120
-        },
-        controls: {
+          nutrisi_dosing_duration: 3,
+          nutrisi_mixing_duration: 120,
+          ph_dosing_duration: 3,
+          ph_mixing_duration: 120
+        };
+      }
+      
+      const controlsSnap = await get(child(ref(database), `devices/${trimmedMac}/controls`));
+      if (!controlsSnap.exists()) {
+        updates[`devices/${trimmedMac}/controls`] = {
           mode: 'auto',
           pump_pestisida: false,
           pump_nutrisi: false,
           pump_ph_up: false,
           pump_ph_down: false,
           reset_wifi: false
-        }
-      });
+        };
+      }
+
+      await update(ref(database), updates);
+      
       setShowAddForm(false);
       setNewMac('');
       setNewName('');
