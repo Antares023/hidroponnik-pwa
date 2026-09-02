@@ -50,27 +50,36 @@ function UserDeviceManager() {
     };
 
     try {
-      // 1. Cek apakah ID sudah terpakai oleh user lain
+      // 1. Cek apakah ID sudah terpakai
       const snapshot = await get(child(ref(database), `devices/${trimmedMac}/owner_uid`));
-      if (snapshot.exists() && snapshot.val() !== currentUser.uid) {
-        Swal.fire({
-          ...swalConfig,
-          title: 'Gagal',
-          text: 'Kode perangkat ini sudah terdaftar di sistem oleh pengguna lain. Harap gunakan kode unik lain.',
-          icon: 'error'
-        });
+      if (snapshot.exists()) {
+        if (snapshot.val() === currentUser.uid) {
+          Swal.fire({
+            ...swalConfig,
+            title: 'Info',
+            text: 'Perangkat ini sudah ada di daftar Anda.',
+            icon: 'info'
+          });
+        } else {
+          Swal.fire({
+            ...swalConfig,
+            title: 'Gagal',
+            text: 'Kode perangkat ini sudah terdaftar di sistem oleh pengguna lain. Harap gunakan kode unik lain.',
+            icon: 'error'
+          });
+        }
         return;
       }
 
       // 2. Jika belum, tambahkan/update tanpa menghapus data sensor yang sudah ada
       const updates = {};
-      updates[`devices/${trimmedMac}/owner_uid`] = currentUser.uid;
-      updates[`devices/${trimmedMac}/name`] = newName;
+      updates[`owner_uid`] = currentUser.uid;
+      updates[`name`] = newName;
       
       // Hanya set nilai default jika belum ada (tidak menimpa kalau sudah ada)
       const settingsSnap = await get(child(ref(database), `devices/${trimmedMac}/settings`));
       if (!settingsSnap.exists()) {
-        updates[`devices/${trimmedMac}/settings`] = {
+        updates[`settings`] = {
           target_tds_min: 800,
           target_tds_max: 1200,
           target_ph_min: 5.5,
@@ -84,7 +93,7 @@ function UserDeviceManager() {
       
       const controlsSnap = await get(child(ref(database), `devices/${trimmedMac}/controls`));
       if (!controlsSnap.exists()) {
-        updates[`devices/${trimmedMac}/controls`] = {
+        updates[`controls`] = {
           mode: 'auto',
           pump_pestisida: false,
           pump_nutrisi: false,
@@ -94,7 +103,8 @@ function UserDeviceManager() {
         };
       }
 
-      await update(ref(database), updates);
+      // Melakukan update pada level node spesifik agar tidak terkena Permission Denied dari Firebase
+      await update(ref(database, `devices/${trimmedMac}`), updates);
       
       setShowAddForm(false);
       setNewMac('');
